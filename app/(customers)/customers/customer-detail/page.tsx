@@ -7,6 +7,7 @@ import { ButtonModule } from "components/ui/Button/Button"
 
 import FreezeAccountModal from "components/ui/Modal/freeze-account-modal"
 import GenerateReceiptmodal from "components/ui/Modal/generate-receipt-modal"
+import { useRouter } from "next/navigation"
 
 export default function Dashboard() {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
@@ -31,6 +32,8 @@ export default function Dashboard() {
     }, 1500)
   }
 
+  const router = useRouter()
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
@@ -38,7 +41,7 @@ export default function Dashboard() {
           <DashboardNav />
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4">
-              <div className="flex items-center gap-2">
+              <div className="flex cursor-pointer items-center gap-2" onClick={() => router.back()}>
                 <img src="/DashboardImages/ArrowLeft.png" alt="dekalo" className="icon-style" />
                 <img src="/DashboardImages/ArrowLeft-dark.png" alt="dekalo" className="dark-icon-style" />
                 <p className="text-2xl font-medium">Robert Fox</p>
@@ -77,7 +80,7 @@ export default function Dashboard() {
 
       <GenerateReceiptmodal
         isOpen={isReceiptModalOpen}
-        onRequestClose={() => setIsFreezeModalOpen(false)}
+        onRequestClose={() => setIsReceiptModalOpen(false)}
         onConfirm={confirmFreezeAccount}
         loading={isFreezing}
       />

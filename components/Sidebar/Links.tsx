@@ -4,26 +4,13 @@ import clsx from "clsx"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import {
-  AdminIcon,
-  ChatIcon,
-  DashboardIcon,
-  EstatesIcon,
-  HomeIcon,
-  LogoutIcon,
-  NoteIcon,
-  Pricing,
-  PropertyIcon,
-  ServiceIcon,
-  SupportIcon,
-  UtilityIcon,
-  VisitorIcon,
-} from "./Icons"
+import { ChatIcon, DashboardIcon, NoteIcon, Pricing, ServiceIcon, SupportIcon, UtilityIcon } from "./Icons"
 
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: DashboardIcon },
   { name: "Transactions", href: "/transactions", icon: Pricing },
-  { name: "Accounts", href: "/accounts", icon: ServiceIcon },
+  { name: "Customers", href: "/customers", icon: ServiceIcon },
+  { name: "Virtual Accounts", href: "/virtual-accounts", icon: NoteIcon },
   {
     name: "Orders",
     href: "",
