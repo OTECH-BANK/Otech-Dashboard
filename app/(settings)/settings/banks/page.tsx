@@ -352,8 +352,10 @@ export default function Banks() {
       <AddBankModal
         isOpen={isAddBusinessModalOpen}
         onRequestClose={() => setIsAddBusinessModalOpen(false)}
-        onSubmit={handleAddBusiness}
         loading={isSubmitting}
+        onSubmit={function (businessData: { bank: string; code: string; logo: File | null }): void {
+          throw new Error("Function not implemented.")
+        }}
       />
 
       <DeleteModal
