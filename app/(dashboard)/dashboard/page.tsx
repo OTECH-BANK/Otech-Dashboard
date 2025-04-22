@@ -46,7 +46,7 @@ export default function Dashboard() {
                           <div className="flex items-end justify-between pt-6">
                             <div>
                               <h5 className="text-secondary text-xl font-semibold max-sm:text-lg">
-                                <span className="text-grey-300 font-normal">NGN</span> 40,453,456.
+                                <span className="text-grey-300 font-normal">NGN</span> 40,453.
                                 <span className="text-grey-300 text-sm">26</span>
                               </h5>
                             </div>
@@ -61,7 +61,7 @@ export default function Dashboard() {
                           <div className="flex items-end justify-between pt-6">
                             <div>
                               <h5 className="text-secondary text-xl font-semibold  max-sm:text-lg ">
-                                <span className="text-grey-300 font-normal">NGN</span> 40,453,456.
+                                <span className="text-grey-300 font-normal">NGN</span> 40,453.
                                 <span className="text-grey-300 text-sm">26</span>
                               </h5>
                             </div>
@@ -76,7 +76,7 @@ export default function Dashboard() {
                           <div className="flex items-end justify-between pt-6">
                             <div>
                               <h5 className="text-secondary text-xl font-semibold  max-sm:text-lg ">
-                                <span className="text-grey-300 font-normal">NGN</span> 40,453,456.
+                                <span className="text-grey-300 font-normal">NGN</span> 40,453.
                                 <span className="text-grey-300 text-sm">26</span>
                               </h5>
                             </div>

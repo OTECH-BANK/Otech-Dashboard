@@ -21,13 +21,15 @@ const accountTypes: AccountType[] = [
   {
     id: "otech-plus",
     label: "Otech Plus",
-    description: "I am an individual looking to manage my crypto taxes.",
+    description:
+      "Admin interface for managing merchants, payments, and user activity on the Otech Plus scan‑to‑pay platform.",
     icon: OtechPlusIcon,
   },
   {
     id: "otech",
     label: "Otech",
-    description: "I am an individual looking to manage my crypto taxes.",
+    description:
+      "Otech MFB Admin Dashboard: Central hub for overseeing all Otech MFB platforms and financial operations.",
     icon: OtechIcon,
   },
   // Uncomment or add more account types as necessary.
