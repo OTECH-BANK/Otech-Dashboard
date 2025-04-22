@@ -1,8 +1,9 @@
 "use client"
-import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ButtonModule } from "components/ui/Button/Button"
+import React, { useEffect, useState } from "react"
 import Footer from "components/Footer/Footer"
+import { ButtonModule } from "components/ui/Button/Button"
+
 import { FormInputModule } from "components/ui/Input/Input"
 import { notify } from "components/ui/Notification/Notification"
 
@@ -66,7 +67,7 @@ const ForgotPassword: React.FC = () => {
         </div>
 
         <div className="flex h-auto rounded-lg max-sm:w-[95%] md:w-[428px] md:border md:bg-[#FFFFFF] md:shadow-sm xl:w-[428px]">
-          <div className="w-full justify-center px-7 py-7  max-sm:p-4">
+          <div className="w-full justify-center p-7  max-sm:p-4">
             <div className="mb-4  items-center border-b pb-2">
               <p className="text-lg font-semibold">Forgot Password</p>
               <p className="text-sm">
@@ -88,7 +89,7 @@ const ForgotPassword: React.FC = () => {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <svg
-                      className="mr-2 h-5 w-5 animate-spin"
+                      className="mr-2 size-5 animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"

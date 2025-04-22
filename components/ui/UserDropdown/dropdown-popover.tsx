@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import Modal from "react-modal"
 import { useRouter } from "next/navigation"
 
-import UserIcon from "public/user-icon" // adjust the path as needed
+import UserIcon from "public/user-icon"
 import EditProfileIcon from "public/edit-profile-icon"
 import PricingIcon from "public/pricing-icon"
 import SupportIcon from "public/support-icon"
@@ -13,7 +13,6 @@ import SettingIcon from "public/setting-icon"
 import LogoutIcon from "public/logout-icon"
 import LogoutModal from "../Modal/logout-modal"
 
-// Set the app element for accessibility (ensure this runs client-side)
 if (typeof window !== "undefined") {
   Modal.setAppElement(document.body)
 }
