@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import React, { useState } from "react"
-import { Links, SecondLinks } from "./Links"
+import { Links } from "./Links"
 import { CollapsedLogoIcon, LogoIcon } from "./Icons"
 
 import clsx from "clsx"
@@ -26,9 +26,9 @@ const SideBar = () => {
         <div className="mb-2 h-full border-b border-[#E4E4E4] lg:h-auto lg:space-y-1">
           <Links isCollapsed={isCollapsed} />
         </div>
-        <div className="h-full border-b border-[#E4E4E4] lg:h-auto lg:space-y-1">
+        {/* <div className="h-full border-b border-[#E4E4E4] lg:h-auto lg:space-y-1">
           <SecondLinks isCollapsed={isCollapsed} />
-        </div>
+        </div> */}
       </div>
       <div className="my-4  flex h-auto items-center justify-between border-t  px-6">
         <div className="flex items-center space-x-2 border-0 border-black pt-5 text-[#747A80] ">
