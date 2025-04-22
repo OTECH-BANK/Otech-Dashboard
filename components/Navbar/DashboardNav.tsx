@@ -12,11 +12,11 @@ const DashboardNav = () => {
   const [searchText, setSearchText] = useState("")
   const [isNavOpen, setIsNavOpen] = useState(false)
   const { theme, setTheme } = useTheme()
-  const isDarkMode = theme === "dark"
+  // const isDarkMode = theme === "dark"
 
-  const toggleTheme = () => {
-    setTheme(isDarkMode ? "light" : "dark")
-  }
+  // const toggleTheme = () => {
+  //   setTheme(isDarkMode ? "light" : "dark")
+  // }
 
   setTimeout(() => setLoading(false), 3000)
 
