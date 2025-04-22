@@ -45,12 +45,24 @@ export const EstatesIcon = ({ isActive }: { isActive: boolean }) => (
   <Image src={isActive ? "/Icons/Estates-active.svg" : "/Icons/Estates.svg"} alt="Estates" width={20} height={20} />
 )
 
+export const SetingIcon = ({ isActive }: { isActive: boolean }) => (
+  <Image src={isActive ? "<SetingIcon />" : "<SetingIcon />"} alt="Estates" width={20} height={20} />
+)
+
 export const HomeIcon = ({ isActive }: { isActive: boolean }) => (
   <Image src={isActive ? "/Icons/Home-active.svg" : "/Icons/Home.svg"} alt="Home" width={20} height={20} />
 )
 
 export const UtilityIcon = ({ isActive }: { isActive: boolean }) => (
   <Image src={isActive ? "/Icons/ShoppingCart.png" : "/Icons/ShoppingCart.png"} alt="Utility" width={20} height={20} />
+)
+
+export const BusinessLogo = ({ isActive }: { isActive: boolean }) => (
+  <Image src={isActive ? "/Icons/Briefcase.svg" : "/Icons/Briefcase.svg"} alt="Briefcase" width={20} height={20} />
+)
+
+export const EmployeeLogo = ({ isActive }: { isActive: boolean }) => (
+  <Image src={isActive ? "/Icons/employee.svg" : "/Icons/employee.svg"} alt="Briefcase" width={20} height={20} />
 )
 
 export const NoteIcon = ({ isActive }: { isActive: boolean }) => (

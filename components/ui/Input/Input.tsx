@@ -5,6 +5,7 @@ import React, { useState } from "react"
 interface FormInputProps {
   label: string
   type: string
+  name?: string
   placeholder: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -17,6 +18,7 @@ export const FormInputModule: React.FC<FormInputProps> = ({
   type,
   placeholder,
   value,
+  name,
   onChange,
   className = "",
   error = false,
@@ -24,7 +26,7 @@ export const FormInputModule: React.FC<FormInputProps> = ({
   const [isFocused, setIsFocused] = useState(false)
 
   return (
-    <div className={`mb-3 ${className}`}>
+    <div className={` ${className}`}>
       <label className="mb-1 block text-sm text-[#2a2f4b]">{label}</label>
       <div
         className={`
@@ -39,6 +41,7 @@ export const FormInputModule: React.FC<FormInputProps> = ({
           placeholder={placeholder}
           className="w-full bg-transparent text-base outline-none"
           value={value}
+          name={name}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}

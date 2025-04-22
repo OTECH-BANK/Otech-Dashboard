@@ -34,7 +34,7 @@ export const ButtonModule: React.FC<ButtonProps> = ({
     "flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
 
   const variantClasses = {
-    primary: "bg-[#f58634] text-[#2a2f4b] hover:bg-[#e57e2e] focus:ring-[#d97528]",
+    primary: "bg-[#f58634] text-[#ffffff] hover:bg-[#e57e2e] focus:ring-[#d97528]",
     black: "bg-[#131319] text-[#ffffff] hover:bg-[#000000] focus:ring-[#131319]",
     secondary: "bg-[#ffe8d1] text-[#f58634] hover:bg-[#fcd8bb] focus:ring-[#f58634]",
     outline: "border border-[#f58634] text-[#f58634] hover:bg-[#ffe8d1] focus:ring-[#f58634]",
