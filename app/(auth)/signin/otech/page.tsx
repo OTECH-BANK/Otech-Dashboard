@@ -26,14 +26,14 @@ const SignIn: React.FC = () => {
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       notify("success", "Login successful!", {
         description: "Redirecting to dashboard...",
-        duration: 3000,
+        duration: 1000,
       })
 
-      setTimeout(() => router.push("/dashboard"), 3000)
+      setTimeout(() => router.push("/dashboard"), 1000)
     } catch (error) {
       notify("error", "Login failed", {
         description: "Invalid credentials. Please try again.",

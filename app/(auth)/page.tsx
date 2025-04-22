@@ -92,15 +92,15 @@ const Accounts: React.FC = () => {
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       notify("success", "Login successful!", {
         description: "Redirecting to login page...",
-        duration: 3000,
+        duration: 1000,
       })
 
       // Redirect to the corresponding login page for the selected account type.
-      setTimeout(() => router.push(`/signin/${selectedAccountType}`), 3000)
+      setTimeout(() => router.push(`/signin/${selectedAccountType}`), 1000)
     } catch (error) {
       notify("error", "Login failed", {
         description: "Invalid credentials. Please try again.",

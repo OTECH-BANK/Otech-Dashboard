@@ -78,13 +78,13 @@ const Page: React.FC = () => {
     if (showSuccessNotification) {
       successTimeout = setTimeout(() => {
         setShowSuccessNotification(false)
-      }, 5000)
+      }, 1000)
     }
 
     if (showErrorNotification) {
       errorTimeout = setTimeout(() => {
         setShowErrorNotification(false)
-      }, 3000)
+      }, 1000)
     }
 
     return () => {
