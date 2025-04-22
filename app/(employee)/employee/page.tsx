@@ -2,7 +2,7 @@
 import DashboardNav from "components/Navbar/DashboardNav"
 import { ButtonModule } from "components/ui/Button/Button"
 import AddBusiness from "public/add-business"
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import AddBusinessModal from "components/ui/Modal/add-business-modal"
 import { useRouter } from "next/navigation"
 import Filtericon from "public/filter-icon"
