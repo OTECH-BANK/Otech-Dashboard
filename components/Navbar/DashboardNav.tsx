@@ -48,7 +48,7 @@ const DashboardNav = () => {
         </div>
       </nav>
 
-      <nav className="block border-b bg-[#F2F6FD] px-16 py-4 max-md:px-3 md:hidden">
+      {/* <nav className="block border-b bg-[#F2F6FD] px-16 py-4 max-md:px-3 md:hidden">
         <div className="flex items-center justify-between">
           <FormatAlignLeftIcon onClick={toggleNav} style={{ cursor: "pointer" }} />
           <Link href="/" className="content-center">
@@ -59,7 +59,7 @@ const DashboardNav = () => {
             <Image className="mr-4" src="/DashboardImages/dropdown.svg" width={15.68} height={15.68} alt="dropdown" />
           </div>
         </div>
-      </nav>
+      </nav> */}
     </>
   )
 }
