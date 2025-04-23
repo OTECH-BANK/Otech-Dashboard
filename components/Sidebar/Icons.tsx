@@ -5,13 +5,13 @@ export const LogoIcon = () => (
   <>
     <Link href="/" className="icon-style mb-5 content-center">
       <div className=" flex items-center justify-center gap-2">
-        <img src="/otech logo.svg" alt="logo" className="h-9 w-9" />
+        <img src="/otech logo.svg" alt="logo" className="h-7 w-7" />
         <p className="text-xl font-semibold text-[#2a2f4b]">Otech MFB</p>
       </div>
     </Link>
     <Link href="/" className="dark-icon-style mb-5 content-center">
       <div className=" flex items-center justify-center gap-2">
-        <img src="/otech logo.svg" alt="logo" className="h-9 w-9" />
+        <img src="/otech logo.svg" alt="logo" className="h-7 w-7" />
         <p className="text-xl font-semibold text-[#2a2f4b]">Otech MFB</p>
       </div>
     </Link>
@@ -22,13 +22,13 @@ export const CollapsedLogoIcon = () => (
   <>
     <Link href="/" className="icon-style content-center">
       <div className=" flex items-center justify-center gap-2">
-        <img src="/otech logo.svg" alt="logo" className="h-9 w-9" />
+        <img src="/otech logo.svg" alt="logo" className="h-7 w-7" />
         <p className="text-xl font-semibold text-[#2a2f4b]">Otech MFB</p>
       </div>
     </Link>
     <Link href="/" className="dark-icon-style content-center ">
       <div className=" flex items-center justify-center gap-2">
-        <img src="/otech logo.svg" alt="logo" className="h-9 w-9" />
+        <img src="/otech logo.svg" alt="logo" className="h-7 w-7" />
         <p className="text-xl font-semibold text-[#2a2f4b]">Otech MFB</p>
       </div>
     </Link>

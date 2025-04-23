@@ -5,8 +5,9 @@ import { Links } from "./Links"
 import { CollapsedLogoIcon, LogoIcon } from "./Icons"
 
 import clsx from "clsx"
+import { PlusLinks } from "./PlusLinks"
 
-const SideBar = () => {
+const PlusSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   return (
@@ -18,13 +19,13 @@ const SideBar = () => {
         "w-64": !isCollapsed,
       })}
     >
-      <div className="l h-full justify-between border-0 border-red-700 lg:mt-6 lg:h-auto">
+      <div className="h-full justify-between border-0 border-red-700 lg:mt-6 lg:h-auto ">
         <div className="border-b border-[#E4E4E4] px-7 transition-opacity lg:block">
           <Link href="/">{isCollapsed ? <CollapsedLogoIcon /> : <LogoIcon />}</Link>
         </div>
 
         <div className="mb-2 h-full border-b border-[#E4E4E4] lg:h-auto lg:space-y-1">
-          <Links isCollapsed={isCollapsed} />
+          <PlusLinks isCollapsed={isCollapsed} />
         </div>
         {/* <div className="h-full border-b border-[#E4E4E4] lg:h-auto lg:space-y-1">
           <SecondLinks isCollapsed={isCollapsed} />
@@ -42,4 +43,4 @@ const SideBar = () => {
   )
 }
 
-export default SideBar
+export default PlusSidebar

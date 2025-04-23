@@ -33,7 +33,7 @@ const SignIn: React.FC = () => {
         duration: 1000,
       })
 
-      setTimeout(() => router.push("/dashboard"), 1000)
+      setTimeout(() => router.push("/otech-plus/dashboard"), 1000)
     } catch (error) {
       notify("error", "Login failed", {
         description: "Invalid credentials. Please try again.",

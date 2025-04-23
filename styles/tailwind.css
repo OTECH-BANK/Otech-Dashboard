@@ -134,7 +134,7 @@ body {
 
 .active-dashboard {
   /* background-color: #f0f0f0; */
-  color: #eec202;
+  background-color: #eec202;
 }
 
 .li__style {
@@ -142,7 +142,7 @@ body {
 }
 
 .dashboard-style {
-  @apply flex items-center  whitespace-nowrap border-0 border-black px-2  py-4 text-[#727272]  transition duration-300 hover:text-[#0000000] max-md:my-2 max-md:h-11 max-md:items-center max-sm:grow lg:justify-normal lg:space-x-2;
+  @apply flex items-center whitespace-nowrap  border-0 border-black px-2 py-4  text-[#727272] transition  duration-300 hover:bg-[#ffe8d1] hover:text-[#0000000] max-md:my-2 max-md:h-11 max-md:items-center max-sm:grow lg:justify-normal lg:space-x-2;
 }
 
 /* [data-theme="dark"] .dashboard-style {
@@ -150,7 +150,7 @@ body {
 } */
 
 .active-dashboard {
-  @apply font-extrabold max-md:my-2 max-md:rounded-md max-md:text-[#eec202] lg:border-r-2 lg:border-[#eec202] lg:bg-inherit lg:text-[#eec202];
+  @apply w-full bg-[#ffe8d1] font-extrabold max-md:my-2 max-md:rounded-md max-md:bg-[#ffe8d1] lg:border-r-2 lg:border-[#f58634] lg:bg-[#ffe8d1];
 }
 
 .tab-bg {

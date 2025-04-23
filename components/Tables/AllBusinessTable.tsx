@@ -159,7 +159,7 @@ const AllBusinessTable = () => {
           <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
               <a
-                href="/businesses/business-detail"
+                href="businesses/business-detail"
                 className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => {
                   onViewDetails(account)
