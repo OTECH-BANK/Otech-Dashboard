@@ -1,12 +1,11 @@
 "use client"
 
-import React, { useState, useRef, ChangeEvent } from "react"
+import React, { ChangeEvent, useState, useRef } from "react"
 import Modal from "react-modal"
 import CloseIcon from "public/close-icon"
 import { ButtonModule } from "../Button/Button"
 import { FormInputModule } from "../Input/Input"
 import { BsFiletypeSvg, BsFiletypeJpg, BsFiletypePng } from "react-icons/bs"
-import CopyIcon from "public/copy-icon"
 import DocIcon from "public/doc-icon"
 import Image from "next/image"
 
