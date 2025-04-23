@@ -5,7 +5,7 @@ import Modal from "react-modal"
 import CloseIcon from "public/close-icon"
 import { ButtonModule } from "../Button/Button"
 import { FormInputModule } from "../Input/Input"
-import { BsFiletypeSvg, BsFiletypeJpg, BsFiletypePng } from "react-icons/bs"
+import { BsFiletypeJpg, BsFiletypePng, BsFiletypeSvg } from "react-icons/bs"
 import DocIcon from "public/doc-icon"
 import Image from "next/image"
 
