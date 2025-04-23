@@ -1,6 +1,6 @@
 "use client"
 
-import React, { ChangeEvent, useState, useRef } from "react"
+import React, { ChangeEvent, useRef, useState } from "react"
 import Modal from "react-modal"
 import CloseIcon from "public/close-icon"
 import { ButtonModule } from "../Button/Button"
