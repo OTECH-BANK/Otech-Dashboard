@@ -3,12 +3,10 @@ import DashboardNav from "components/Navbar/DashboardNav"
 import { ButtonModule } from "components/ui/Button/Button"
 import AddBusiness from "public/add-business"
 import React, { useEffect, useRef, useState } from "react"
-import AddBusinessModal from "components/ui/Modal/add-business-modal"
 import { useRouter } from "next/navigation"
 import Filtericon from "public/filter-icon"
 import { RxDotsVertical } from "react-icons/rx"
 import DeleteModal from "components/ui/Modal/delete-modal"
-import EditModal from "components/ui/Modal/edit-modal"
 import Image from "next/image"
 import AddBankModal from "components/ui/Modal/add-bank-modal"
 
@@ -54,7 +52,7 @@ export default function Banks() {
       id: 3,
       name: "Guaranty Trust Bank",
       code: "058",
-      logo: "/Banks/GTBank.svg",
+      logo: "/Banks/gtbank.svg",
       accountNumber: "****9012",
       country: "Nigeria",
     },
