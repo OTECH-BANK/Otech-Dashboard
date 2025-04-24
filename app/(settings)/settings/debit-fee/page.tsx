@@ -28,7 +28,7 @@ export default function Dashboard() {
         <div className="flex w-full flex-col">
           <DashboardNav />
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4">
+            <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
               <p className="text-2xl font-medium">Debit Feees</p>
               {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ButtonModule

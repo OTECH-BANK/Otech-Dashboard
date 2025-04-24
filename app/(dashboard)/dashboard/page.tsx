@@ -26,18 +26,18 @@ export default function Dashboard() {
         <div className="flex w-full flex-col">
           <DashboardNav />
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4">
-              <p className="text-2xl font-medium">Dashboard</p>
+            <div className="flex items-center justify-between border-b px-3 py-4 md:px-16">
+              <p className="font-medium md:text-2xl">Dashboard</p>
               {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ExchangeRateMarquee />
             </div>
 
-            <div className="max-sm-my-4 flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">
+            <div className="max-sm-my-4 flex w-full gap-6 px-16 max-md:flex-col  max-sm:px-3 max-sm:py-4 md:my-8">
               <div className="w-full">
-                <div className="flex w-full gap-3 max-lg:grid max-lg:grid-cols-2">
-                  <div className="flex w-3/4">
+                <div className="flex w-full gap-3 max-lg:grid max-lg:grid-cols-1 max-sm:flex-col">
+                  <div className="flex max-sm:flex-col md:w-3/4">
                     <div className="w-full">
-                      <div className="mb-3 flex w-full cursor-pointer gap-3">
+                      <div className="mb-3 flex w-full cursor-pointer gap-3 max-sm:flex-col">
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-1 border-b pb-4 max-sm:mb-2">
                             <TotalAssets />
@@ -85,7 +85,7 @@ export default function Dashboard() {
 
                         {/* Additional small cards can be similarly defined... */}
                       </div>
-                      <div className="flex w-full cursor-pointer gap-3">
+                      <div className="flex w-full cursor-pointer gap-3 max-sm:flex-col">
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-1 border-b pb-4 max-sm:mb-2">
                             <AccountIcon />
@@ -144,7 +144,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex w-1/4 flex-col justify-between rounded-md border bg-white p-4">
+                  <div className="flex flex-col justify-between rounded-md border bg-white p-4 md:w-1/4">
                     <div className="flex items-center gap-2 border-b pb-4">
                       <InsightIcon />
                       <p className="text-lg font-medium">Model Popularity</p>

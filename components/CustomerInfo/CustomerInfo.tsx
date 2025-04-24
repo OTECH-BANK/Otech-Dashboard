@@ -4,8 +4,8 @@ import { GoChevronUp } from "react-icons/go"
 const CustomerInfo = () => {
   return (
     <div className="flex flex-col rounded-md border bg-white">
-      <div className="flex justify-between gap-3 p-4">
-        <div className="w-1/2 border-r  ">
+      <div className="flex justify-between gap-3 p-4 max-sm:flex-col">
+        <div className="max-sm:border-b max-sm:pb-2 md:w-1/2 md:border-r  ">
           <div className="flex items-center gap-2 ">
             <p className="font-medium">Account Info.</p>
           </div>
@@ -20,7 +20,7 @@ const CustomerInfo = () => {
           </div>
         </div>
 
-        <div className="w-1/2 border-r  ">
+        <div className="max-sm:border-b max-sm:pb-2 md:w-1/2 md:border-r  ">
           <div className="flex items-center gap-2 ">
             <p className="font-medium">Account Summary: </p>
           </div>
@@ -35,7 +35,7 @@ const CustomerInfo = () => {
           <p className="li__style mt-2">Opted-in for promotional emails? (Yes/No)</p>
           <p className="li__style mt-2">Preferred communication method: Email/SMS.</p>
         </div>
-        <div className="w-1/2">
+        <div className="md:w-1/2">
           <p className=" font-medium">Admin Activity Report</p>
           <p className="li__style mt-4">Reminder Sent on 26/12/2024 8:30am</p>
         </div>

@@ -40,15 +40,15 @@ export default function Dashboard() {
         <div className="flex  w-full flex-col">
           <DashboardNav />
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4">
-              <div className="flex cursor-pointer items-center gap-2" onClick={() => router.back()}>
+            <div className="flex  justify-between border-b px-16 py-4 max-sm:flex-col max-sm:px-3">
+              <div className="flex cursor-pointer  gap-2" onClick={() => router.back()}>
                 <img src="/DashboardImages/ArrowLeft.png" alt="dekalo" className="icon-style" />
                 <img src="/DashboardImages/ArrowLeft-dark.png" alt="dekalo" className="dark-icon-style" />
-                <p className="text-2xl font-medium">Business 001</p>
+                <p className="font-medium md:text-2xl ">Business 001</p>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 max-sm:pt-4">
                 <ButtonModule variant="outline" size="md" iconPosition="end" onClick={handleGenerateReceipt}>
-                  Generate Bank Statement
+                  Generate Statement
                 </ButtonModule>
                 <ButtonModule variant="black" size="md" iconPosition="end" onClick={handleFreezeAccount}>
                   Freeze Account
@@ -56,13 +56,13 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="max-sm-my-4 mt-8 flex w-full gap-6  px-16 max-md:flex-col max-md:px-0 max-sm:px-3">
+            <div className="mt-8 flex w-full gap-6 px-16  max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3">
               <div className="w-full">
                 <CustomerInfo />
               </div>
             </div>
 
-            <div className="max-sm-my-4 flex w-full gap-6 px-16  max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">
+            <div className="flex w-full gap-6 px-16 max-md:flex-col  max-md:px-0 max-sm:mb-4 max-sm:px-3 md:my-8">
               <div className="w-full">
                 <AllTransactionTable />
               </div>

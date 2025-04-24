@@ -220,8 +220,8 @@ export default function AllTransactions() {
         <div className="flex w-full flex-col">
           <DashboardNav />
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4">
-              <p className="text-2xl font-medium">Employee Page</p>
+            <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
+              <p className="text-2xl font-medium max-sm:text-lg">Employee Page</p>
               <ButtonModule
                 variant="primary"
                 size="md"
@@ -233,7 +233,7 @@ export default function AllTransactions() {
               </ButtonModule>
             </div>
 
-            <div className="max-sm-my-4 flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">
+            <div className="flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3 md:my-8">
               <div className="flex h-screen w-full max-sm:flex-col">
                 <div className={`w-full flex-1 ${isFilterOpen ? "mr-0" : ""}`}>
                   <div className="mb-5 flex items-center justify-between">
@@ -252,12 +252,12 @@ export default function AllTransactions() {
                     </ButtonModule>
                   </div>
                   <div
-                    className={`grid w-full gap-4 max-sm:grid-cols-1 max-sm:px-0 lg:grid-cols-3 2xl:grid-cols-4 ${
+                    className={`grid w-full gap-4 max-sm:mb-4 max-sm:grid-cols-1 max-sm:px-0 lg:grid-cols-3 2xl:grid-cols-4 ${
                       isFilterOpen ? "lg-grid-cols-2 2xl:grid-cols-3" : ""
                     }`}
                   >
                     {practitionersData.map((practitioner) => (
-                      <div key={practitioner.id} className="relative rounded-lg bg-white p-4 shadow-lg">
+                      <div key={practitioner.id} className="relative rounded-lg bg-white p-4 shadow-lg ">
                         <div className="flex gap-4">
                           <div className="relative h-[46px] w-[46px]">
                             <div className="text-grey-600 flex h-[44px] w-[44px] items-center justify-center rounded-md bg-[#F5F8FA] font-medium">

@@ -27,18 +27,18 @@ export default function AllTransactions() {
         <div className="flex w-full flex-col">
           <DashboardNav />
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4">
-              <p className="text-2xl font-medium">All Accounts</p>
+            <div className="flex items-center justify-between border-b px-3 py-4 md:px-16">
+              <p className="text-2xl font-medium">All Customers</p>
               {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ExchangeRateMarquee />
             </div>
 
-            <div className="max-sm-my-4 flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">
+            <div className="flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3 md:my-8">
               <div className="w-full">
-                <div className="flex w-full gap-3 max-lg:grid max-lg:grid-cols-2">
-                  <div className="flex w-full">
+                <div className="flex w-full gap-3 max-lg:grid max-lg:grid-cols-2 max-sm:grid-cols-1">
+                  <div className="flex w-full max-sm:flex-col">
                     <div className="w-full">
-                      <div className="mb-3 flex w-full cursor-pointer gap-3">
+                      <div className="mb-3 flex w-full cursor-pointer gap-3 max-sm:flex-col ">
                         {/* Overview starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">

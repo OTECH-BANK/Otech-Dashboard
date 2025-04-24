@@ -146,8 +146,8 @@ const DebitFeesTable = () => {
   return (
     <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
       {/* Header */}
-      <div className="flex items-center justify-between border-b py-4">
-        <p className="text-2xl font-medium">All Debit Fees</p>
+      <div className="items-center justify-between border-b py-2 md:flex md:py-4">
+        <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">All Debit Fees</p>
         <div className="flex gap-4">
           <SearchModule
             value={searchText}
@@ -161,7 +161,7 @@ const DebitFeesTable = () => {
             iconPosition="end"
             onClick={() => alert("Button clicked!")}
           >
-            Export
+            <p className="max-sm:hidden">Export CSV</p>
           </ButtonModule>
         </div>
       </div>

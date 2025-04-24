@@ -45,16 +45,13 @@ export default function Dashboard() {
         <div className="flex  w-full flex-col">
           <DashboardNav />
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4">
+            <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
               <div className="flex cursor-pointer items-center gap-2" onClick={() => router.back()}>
                 <img src="/DashboardImages/ArrowLeft.png" alt="dekalo" className="icon-style" />
                 <img src="/DashboardImages/ArrowLeft-dark.png" alt="dekalo" className="dark-icon-style" />
-                <p className="text-2xl font-medium">Employee 001</p>
+                <p className="text-2xl font-medium max-sm:text-lg">Employee 001</p>
               </div>
               <div className="flex gap-4">
-                {/* <ButtonModule variant="outline" size="md" iconPosition="end" onClick={handleGenerateReceipt}>
-                  Generate Bank Statement
-                </ButtonModule> */}
                 <ButtonModule variant="black" size="md" iconPosition="end" onClick={handleGenerateReceipt}>
                   Edit Employee
                 </ButtonModule>
@@ -62,7 +59,7 @@ export default function Dashboard() {
             </div>
 
             <div className="max-sm-my-4 mt-8 flex  w-full items-start gap-6  px-16 max-md:flex-col max-md:px-0 max-sm:px-3">
-              <div className="w-1/3 rounded-md bg-[#FFFFFF] p-4 shadow-md">
+              <div className="w-1/3 rounded-md bg-[#FFFFFF] p-4 shadow-md max-sm:w-full">
                 <div className="flex gap-4">
                   <div className="relative h-[46px] w-[46px]">
                     <div className="text-grey-600 flex h-[44px] w-[44px] items-center justify-center rounded-md bg-[#F5F8FA] font-medium">
@@ -119,16 +116,16 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex w-2/3 flex-col items-start rounded-md bg-[#EBEFF3] p-4">
+              <div className="flex w-2/3 flex-col items-start rounded-md bg-[#EBEFF3] p-4 max-sm:w-full">
                 <div className="flex w-full justify-between">
                   <p className="text-2xl font-bold">Adegboyega & Akinsanya LLC</p>
                 </div>
-                <span className="text-grey-400 mt-2 w-1/2 space-y-0">
+                <span className="text-grey-400 mt-2 space-y-0 md:w-1/2">
                   Lorem ipsum dolor sit amet consectetur. Lorem ornare nullam integer porttitor nibh in elementum at
                   libero. Gravida at sit et.
                 </span>
 
-                <div className="my-4 flex gap-2">
+                <div className="my-4 flex flex-wrap gap-2">
                   <div className="rounded bg-[#CBD5E1] px-2 py-1">
                     <p className="text-sm text-[#384860]">Financial reporting</p>
                   </div>

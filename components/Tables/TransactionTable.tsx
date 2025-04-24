@@ -188,10 +188,10 @@ const TrabsactionTable = () => {
   }
 
   return (
-    <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
+    <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-3 md:p-5">
       {/* Header */}
-      <div className="flex items-center justify-between border-b py-4">
-        <p className="text-2xl font-medium">Recent Transactions</p>
+      <div className="items-center justify-between border-b py-2 md:flex md:py-4">
+        <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">Recent Transactions</p>
         <div className="flex gap-4">
           <SearchModule
             value={searchText}
@@ -205,7 +205,7 @@ const TrabsactionTable = () => {
             iconPosition="end"
             onClick={() => alert("Button clicked!")}
           >
-            Export
+            <p className="max-sm:hidden">Export</p>
           </ButtonModule>
         </div>
       </div>

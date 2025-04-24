@@ -149,7 +149,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ isOpen,
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      className="h-auto w-[481px] overflow-hidden rounded-md bg-white shadow-lg outline-none"
+      className="flex h-auto w-[481px] overflow-hidden rounded-md bg-white shadow-lg outline-none max-sm:w-full max-sm:max-w-[380px]"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
       ariaHideApp={false}
     >

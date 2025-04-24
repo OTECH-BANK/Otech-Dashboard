@@ -1,24 +1,20 @@
+"use client"
+
 import React, { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useTheme } from "next-themes"
+import { usePathname } from "next/navigation"
 import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft"
 import { SearchModule } from "components/ui/Search/search-module"
 import UserDropdown from "components/ui/UserDropdown/dropdown-popover"
 import NotificationDropdown from "components/ui/UserDropdown/notification-popover"
+import { RxCross2 } from "react-icons/rx"
+import { Links } from "components/Sidebar/Links"
 
 const DashboardNav = () => {
-  const [loading, setLoading] = useState(true)
   const [searchText, setSearchText] = useState("")
   const [isNavOpen, setIsNavOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
-  // const isDarkMode = theme === "dark"
-
-  // const toggleTheme = () => {
-  //   setTheme(isDarkMode ? "light" : "dark")
-  // }
-
-  setTimeout(() => setLoading(false), 3000)
+  const pathname = usePathname()
 
   const handleCancelSearch = () => {
     setSearchText("")
@@ -48,18 +44,33 @@ const DashboardNav = () => {
         </div>
       </nav>
 
-      {/* <nav className="block border-b bg-[#F2F6FD] px-16 py-4 max-md:px-3 md:hidden">
+      <nav className="block border-b bg-[#ffe8d1] px-16 py-4 max-md:px-3 md:hidden">
         <div className="flex items-center justify-between">
-          <FormatAlignLeftIcon onClick={toggleNav} style={{ cursor: "pointer" }} />
           <Link href="/" className="content-center">
-            <Image src="/AuthImages/amd-logo.png" width={150} height={43} alt="dekalo" />
+            <Image src="/otech logo.svg" width={40} height={40} alt="dekalo" />
           </Link>
-          <div className="flex h-[50px] items-center justify-center gap-1 rounded-full bg-[#EDF2F7] px-1">
-            <Image src="/DashboardImages/User.svg" width={40} height={40} alt="avatar" />
-            <Image className="mr-4" src="/DashboardImages/dropdown.svg" width={15.68} height={15.68} alt="dropdown" />
+          <FormatAlignLeftIcon onClick={toggleNav} style={{ cursor: "pointer" }} />
+        </div>
+
+        <div
+          className={`fixed left-0 top-0 z-50 h-full w-[250px] bg-[#ffffff] transition-transform duration-300 ${
+            isNavOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-end p-4">
+            <RxCross2 className="text-white" onClick={toggleNav} style={{ cursor: "pointer" }} />
+          </div>
+
+          <div className="mt-4 flex flex-col items-start space-y-2 p-4">
+            <Links isCollapsed={false} />
+
+            <Link href="/logout" className="fixed bottom-2 mt-10 flex items-center gap-2 pb-4 text-white">
+              <Image src="/Icons/Logout.svg" width={20} height={20} alt="logout" />
+              <p className="mt-1">Logout</p>
+            </Link>
           </div>
         </div>
-      </nav> */}
+      </nav>
     </>
   )
 }
