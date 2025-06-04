@@ -57,9 +57,7 @@ export default function Dashboard() {
             </div>
 
             <div className="max-sm-my-4 mt-8 flex w-full gap-6  px-16 max-md:flex-col max-md:px-0 max-sm:px-3">
-              <div className="w-full">
-                <CustomerInfo />
-              </div>
+              <div className="w-full"></div>
             </div>
 
             <div className="max-sm-my-4 flex w-full gap-6 px-16  max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">
@@ -70,13 +68,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      <FreezeAccountModal
-        isOpen={isFreezeModalOpen}
-        onRequestClose={() => setIsFreezeModalOpen(false)}
-        onConfirm={confirmFreezeAccount}
-        loading={isFreezing}
-      />
 
       <GenerateReceiptmodal
         isOpen={isReceiptModalOpen}

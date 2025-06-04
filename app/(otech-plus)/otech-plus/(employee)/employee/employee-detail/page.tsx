@@ -197,13 +197,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <FreezeAccountModal
-        isOpen={isFreezeModalOpen}
-        onRequestClose={() => setIsFreezeModalOpen(false)}
-        onConfirm={confirmFreezeAccount}
-        loading={isFreezing}
-      />
-
       <GenerateReceiptmodal
         isOpen={isReceiptModalOpen}
         onRequestClose={() => setIsReceiptModalOpen(false)}
