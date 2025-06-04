@@ -1,346 +1,307 @@
 "use client"
+
 import DashboardNav from "components/Navbar/DashboardNav"
 import { ButtonModule } from "components/ui/Button/Button"
 import AddBusiness from "public/add-business"
-import React, { useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import React, { useRef, useState } from "react"
 import Filtericon from "public/filter-icon"
-import { RxDotsVertical } from "react-icons/rx"
 import DeleteModal from "components/ui/Modal/delete-modal"
-import Image from "next/image"
 import AddBankModal from "components/ui/Modal/add-bank-modal"
+import { useGetBanksQuery } from "lib/redux/api"
+import { notify } from "components/ui/Notification/Notification"
+import { BankLogo } from "components/ui/BanksLogo/bank-logo"
+import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos } from "react-icons/md"
 
-interface Bank {
+interface DisplayBank {
   id: number
-  name: string
-  code: string
+  bankCode: string
+  bankName: string
+  bankAlias: string
   logo: string
-  accountNumber: string
-  country: string
 }
 
 export default function Banks() {
   const [isAddBusinessModalOpen, setIsAddBusinessModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null)
-  const [editModalState, setEditModalState] = useState({
-    isOpen: false,
-    bank: null as Bank | null,
-  })
-  const [isEditing, setIsEditing] = useState(false)
-
-  const banksData: Bank[] = [
-    {
-      id: 1,
-      name: "Zenith Bank",
-      code: "057",
-      logo: "/Banks/zenith.svg",
-      accountNumber: "****1234",
-      country: "Nigeria",
-    },
-    {
-      id: 2,
-      name: "First Bank",
-      code: "011",
-      logo: "/Banks/firstbank.svg",
-      accountNumber: "****5678",
-      country: "Nigeria",
-    },
-    {
-      id: 3,
-      name: "Guaranty Trust Bank",
-      code: "058",
-      logo: "/Banks/gtbank.svg",
-      accountNumber: "****9012",
-      country: "Nigeria",
-    },
-    {
-      id: 4,
-      name: "Access Bank",
-      code: "044",
-      logo: "/Banks/access.svg",
-      accountNumber: "****3456",
-      country: "Nigeria",
-    },
-    {
-      id: 5,
-      name: "United Bank for Africa",
-      code: "033",
-      logo: "/Banks/uba.svg",
-      accountNumber: "****7890",
-      country: "Nigeria",
-    },
-    {
-      id: 6,
-      name: "Ecobank",
-      code: "050",
-      logo: "/Banks/ecobank.svg",
-      accountNumber: "****2345",
-      country: "Pan-African",
-    },
-    {
-      id: 7,
-      name: "Stanbic IBTC",
-      code: "221",
-      logo: "/Banks/stanbic.svg",
-      accountNumber: "****6789",
-      country: "Nigeria",
-    },
-    {
-      id: 8,
-      name: "Fidelity Bank",
-      code: "070",
-      logo: "/Banks/fidelity.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 9,
-      name: "Polaris Bank",
-      code: "070",
-      logo: "/Banks/polaris.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 10,
-      name: "ALAT by WEMA",
-      code: "070",
-      logo: "/Banks/alat.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 11,
-      name: "Bowen MFB",
-      code: "070",
-      logo: "/Banks/bowen.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 12,
-      name: "FCMB",
-      code: "070",
-      logo: "/Banks/fcmb.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 13,
-      name: "Unity Bank",
-      code: "070",
-      logo: "/Banks/unity.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 14,
-      name: "Sterling Bank",
-      code: "070",
-      logo: "/Banks/sterling.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 15,
-      name: "Standard Chartered Bank",
-      code: "070",
-      logo: "/Banks/standard.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 16,
-      name: "Union Bank",
-      code: "070",
-      logo: "/Banks/union.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-    {
-      id: 17,
-      name: "Providus Bank",
-      code: "070",
-      logo: "/Banks/providus.svg",
-      accountNumber: "****0123",
-      country: "Nigeria",
-    },
-  ]
-
   const [deleteModalState, setDeleteModalState] = useState({
     isOpen: false,
     bankId: null as number | null,
     bankName: "",
   })
   const [isDeleting, setIsDeleting] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(100)
   const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
 
-  const setDropdownRef = (id: number) => (el: HTMLDivElement | null) => {
-    dropdownRefs.current[id] = el
+  const { data: banks, error, isLoading } = useGetBanksQuery()
+
+  const banksData: DisplayBank[] = banks
+    ? banks.map((b, i) => ({
+        id: i + 1,
+        bankCode: b.bankCode,
+        bankName: b.bankName,
+        bankAlias: b.bankAlias,
+        logo: getBankLogo(b.bankCode),
+      }))
+    : []
+
+  function getBankLogo(bankCode: string): string {
+    const bankLogos: Record<string, string> = {}
+    return bankLogos[bankCode] || "/Banks/default.svg"
   }
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const clickedOutsideAll = Object.values(dropdownRefs.current).every((ref) => {
-        return ref && !ref.contains(event.target as Node)
-      })
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentBanks = banksData.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(banksData.length / itemsPerPage)
 
-      if (clickedOutsideAll) {
-        setOpenDropdownId(null)
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+  }
+
+  const renderPageNumbers = () => {
+    const pageNumbers = []
+    const maxVisiblePages = 5 // Number of pages to show before using ellipsis
+
+    // Always show first page
+    pageNumbers.push(
+      <button
+        key={1}
+        onClick={() => paginate(1)}
+        className={`rounded-full px-3 py-1 ${
+          currentPage === 1 ? "bg-primary text-black" : "bg-gray-200 hover:bg-gray-300"
+        }`}
+      >
+        1
+      </button>
+    )
+
+    // Show ellipsis after first page if current page is far from start
+    if (currentPage > maxVisiblePages) {
+      pageNumbers.push(
+        <span key="left-ellipsis" className="px-2 py-1">
+          ...
+        </span>
+      )
+    }
+
+    // Determine range of pages to show around current page
+    const startPage = Math.max(2, currentPage - 1)
+    const endPage = Math.min(totalPages - 1, currentPage + 1)
+
+    // Show pages around current page
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > 1 && i < totalPages) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => paginate(i)}
+            className={`rounded-full px-3 py-1 ${
+              currentPage === i ? "bg-primary text-black" : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            {i}
+          </button>
+        )
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+    // Show ellipsis before last page if current page is far from end
+    if (currentPage < totalPages - (maxVisiblePages - 2)) {
+      pageNumbers.push(
+        <span key="right-ellipsis" className="px-2 py-1">
+          ...
+        </span>
+      )
     }
-  }, [])
+
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      pageNumbers.push(
+        <button
+          key={totalPages}
+          onClick={() => paginate(totalPages)}
+          className={`rounded-full px-3 py-1 ${
+            currentPage === totalPages ? "bg-primary text-black" : "bg-gray-200 hover:bg-gray-300"
+          }`}
+        >
+          {totalPages}
+        </button>
+      )
+    }
+
+    return pageNumbers
+  }
 
   const handleConfirmDelete = async (reason: string) => {
     setIsDeleting(true)
     try {
-      console.log(`Deleting bank ${deleteModalState.bankId} with reason: ${reason}`)
+      // TODO: call your delete API here
       await new Promise((resolve) => setTimeout(resolve, 1000))
+      notify("success", "Bank deleted successfully")
     } catch (error) {
-      console.error("Error deleting bank:", error)
+      notify("error", "Failed to delete bank")
+      console.error(error)
     } finally {
       setIsDeleting(false)
-      setDeleteModalState({
-        isOpen: false,
-        bankId: null,
-        bankName: "",
-      })
+      setDeleteModalState({ isOpen: false, bankId: null, bankName: "" })
     }
   }
 
-  const closeDeleteModal = () => {
-    setDeleteModalState({
-      isOpen: false,
-      bankId: null,
-      bankName: "",
-    })
-  }
-
-  const toggleFilter = () => {
-    setIsFilterOpen(!isFilterOpen)
-  }
-
-  const handleAddBusiness = async (businessData: { name: string; email: string; phone: string; address: string }) => {
+  const handleAddBank = async (bankData: { bank: string; code: string; logo: File | null }) => {
     setIsSubmitting(true)
     try {
-      console.log("Adding business:", businessData)
+      // TODO: post to your add-bank API here
       await new Promise((resolve) => setTimeout(resolve, 1000))
+      notify("success", "Bank added successfully")
       setIsAddBusinessModalOpen(false)
     } catch (error) {
-      console.error("Error adding business:", error)
+      notify("error", "Failed to add bank")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const closeDeleteModal = () => setDeleteModalState({ isOpen: false, bankId: null, bankName: "" })
+
+  const toggleFilter = () => setIsFilterOpen((prev) => !prev)
+
+  if (error) {
+    console.error("Failed to load banks:", error)
+    return (
+      <section className="h-full w-full">
+        <DashboardNav />
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-red-500">Failed to load banks</div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="h-full w-full">
-      <div className="flex min-h-screen w-full">
-        <div className="flex w-full flex-col">
-          <DashboardNav />
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
-              <p className="text-2xl font-medium">Banks</p>
-              <ButtonModule
-                variant="primary"
-                size="md"
-                icon={<AddBusiness />}
-                iconPosition="start"
-                onClick={() => setIsAddBusinessModalOpen(true)}
-              >
-                Add New Bank
-              </ButtonModule>
-            </div>
+      <div className="flex min-h-screen w-full flex-col">
+        <DashboardNav />
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
+            <p className="text-2xl font-medium">Banks</p>
+            <ButtonModule
+              variant="primary"
+              size="md"
+              icon={<AddBusiness />}
+              iconPosition="start"
+              onClick={() => setIsAddBusinessModalOpen(true)}
+            >
+              Add New Bank
+            </ButtonModule>
+          </div>
 
-            <div className="flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3 md:my-8">
-              <div className="flex h-screen w-full max-sm:flex-col">
-                <div className={`w-full flex-1 ${isFilterOpen ? "mr-0" : ""}`}>
-                  <div className="mb-5 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm max-sm:text-xs">
-                      <p className="text-grey-300">Banks Count:</p>
+          <div className="flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3 md:my-8">
+            <div className="flex h-screen w-full max-sm:flex-col">
+              <div className="w-full flex-1">
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm max-sm:text-xs">
+                    <p className="text-grey-300">Banks Count:</p>
+                    {isLoading ? (
+                      <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+                    ) : (
                       <p>{banksData.length}</p>
-                    </div>
-                    <ButtonModule
-                      variant="secondary"
-                      size="md"
-                      icon={<Filtericon />}
-                      iconPosition="end"
-                      onClick={toggleFilter}
-                    >
-                      Filter
-                    </ButtonModule>
+                    )}
                   </div>
-                  <div
-                    className={`mb-4 grid w-full gap-4 max-sm:grid-cols-1 max-sm:px-0 lg:grid-cols-3 2xl:grid-cols-4 ${
-                      isFilterOpen ? "lg:grid-cols-2 2xl:grid-cols-3" : ""
-                    }`}
+                  <ButtonModule
+                    variant="secondary"
+                    size="md"
+                    icon={<Filtericon />}
+                    iconPosition="end"
+                    onClick={toggleFilter}
                   >
-                    {banksData.map((bank) => (
-                      <div key={bank.id} className="relative rounded-lg bg-white p-4 shadow-lg">
-                        <div className="flex gap-4">
-                          <div className="relative h-[46px] w-[46px]">
-                            <div className="text-grey-600 flex h-[44px] w-[44px] items-center justify-center rounded-md bg-[#F5F8FA] font-medium">
-                              <Image src={bank.logo} alt={bank.name} width={60} height={60} />
+                    Filter
+                  </ButtonModule>
+                </div>
+                <div
+                  className={`mb-4 grid w-full gap-4 max-sm:grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 ${
+                    isFilterOpen ? "lg:grid-cols-2 2xl:grid-cols-3" : ""
+                  }`}
+                >
+                  {isLoading
+                    ? // Skeleton loading state
+                      Array.from({ length: 6 }).map((_, index) => (
+                        <div key={index} className="rounded-lg bg-white p-4 shadow-lg">
+                          <div className="flex gap-4">
+                            <div className="relative h-[46px] w-[46px]">
+                              <div className="h-full w-full animate-pulse rounded-md bg-gray-200"></div>
+                            </div>
+                            <div className="flex-1 space-y-2">
+                              <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200"></div>
+                              <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200"></div>
+                              <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200"></div>
                             </div>
                           </div>
-
-                          <div className="flex-1">
-                            <h3 className="text-base font-bold">{bank.name}</h3>
-                            <p className="text-sm">Code: {bank.code}</p>
-                            <p className="text-sm">Country: {bank.country}</p>
-                          </div>
-                          <div className="relative" ref={setDropdownRef(bank.id)}>
-                            <button
-                              className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                              onClick={() => setOpenDropdownId(openDropdownId === bank.id ? null : bank.id)}
-                            >
-                              <RxDotsVertical />
-                            </button>
-                            {openDropdownId === bank.id && (
-                              <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                                <div className="py-1">
-                                  <button
-                                    onClick={() => {
-                                      setEditModalState({
-                                        isOpen: true,
-                                        bank: bank,
-                                      })
-                                      setOpenDropdownId(null)
-                                    }}
-                                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setDeleteModalState({
-                                        isOpen: true,
-                                        bankId: bank.id,
-                                        bankName: bank.name,
-                                      })
-                                      setOpenDropdownId(null)
-                                    }}
-                                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                            )}
+                        </div>
+                      ))
+                    : // Actual bank data
+                      currentBanks.map((bank) => (
+                        <div key={bank.id} className="relative rounded-lg bg-white p-4 shadow-lg">
+                          <div className="flex gap-4">
+                            <div className="relative h-[46px] w-[46px]">
+                              <BankLogo
+                                bankCode={bank.bankCode}
+                                bankName={bank.bankName}
+                                width={60}
+                                height={60}
+                                className="rounded-md"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-base font-bold">{bank.bankName}</h3>
+                              <p className="text-sm">Code: {bank.bankCode}</p>
+                              <p className="text-sm">Alias: {bank.bankAlias}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
                 </div>
+
+                {/* Pagination */}
+                {!isLoading && banksData.length > itemsPerPage && (
+                  <div className="flex items-center justify-between border-t px-4 py-3">
+                    <div className="text-sm text-gray-700">
+                      Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, banksData.length)} of{" "}
+                      {banksData.length} entries
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => paginate(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`rounded-full px-2 py-1 ${
+                          currentPage === 1
+                            ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                            : "bg-gray-200 hover:bg-gray-300"
+                        }`}
+                      >
+                        <MdOutlineArrowBackIosNew />
+                      </button>
+
+                      {renderPageNumbers()}
+
+                      <button
+                        onClick={() => paginate(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`rounded-full px-2 py-1 ${
+                          currentPage === totalPages
+                            ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                            : "bg-gray-200 hover:bg-gray-300"
+                        }`}
+                      >
+                        <MdOutlineArrowForwardIos />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -351,9 +312,7 @@ export default function Banks() {
         isOpen={isAddBusinessModalOpen}
         onRequestClose={() => setIsAddBusinessModalOpen(false)}
         loading={isSubmitting}
-        onSubmit={function (businessData: { bank: string; code: string; logo: File | null }): void {
-          throw new Error("Function not implemented.")
-        }}
+        onSubmit={handleAddBank}
       />
 
       <DeleteModal

@@ -718,7 +718,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12345",
     customer: "Robert Fox",
-    doorModel: "John Doe",
+    beneficiary: "John Doe",
     bank: "Zenith Bank",
     type: "Outgoing",
     payment70: "3,679,980",
@@ -728,7 +728,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12346",
     customer: "Robert Lee",
-    doorModel: "Robert Otem",
+    beneficiary: "Robert Otem",
     bank: "Otech MFB",
     type: "Incoming",
     payment70: "3,679,980",
@@ -738,7 +738,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12347",
     customer: "Robert Chang",
-    doorModel: "Ibrahim Muritala",
+    beneficiary: "Ibrahim Muritala",
     bank: "Access Bank",
     type: "Outgoing",
     payment70: "3,679,980",
@@ -748,7 +748,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12348",
     customer: "Robert Lee",
-    doorModel: "Manuel Chijioke",
+    beneficiary: "Manuel Chijioke",
     bank: "Polaris Bank",
     type: "Outgoing",
     payment70: "3,679,980",
@@ -758,7 +758,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "Otech MFB",
     type: "Incoming",
     payment70: "3,679,980",
@@ -768,7 +768,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "ALAT by WEMA",
     type: "Incoming",
     payment70: "3,679,980",
@@ -778,7 +778,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "Bowen MFB",
     type: "Incoming",
     payment70: "3,679,980",
@@ -788,7 +788,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "FCMB",
     type: "Incoming",
     payment70: "3,679,980",
@@ -798,7 +798,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "First Bank",
     type: "Outgoing",
     payment70: "3,679,980",
@@ -808,7 +808,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "Jaiz Bank",
     type: "Outgoing",
     payment70: "3,679,980",
@@ -818,7 +818,7 @@ export const ordersData: Order[] = [
   {
     orderId: "#ORD12349",
     customer: "Robert Lee",
-    doorModel: "Damilare Sneh",
+    beneficiary: "Damilare Sneh",
     bank: "Sterling Bank",
     type: "Incoming",
     payment70: "3,679,980",

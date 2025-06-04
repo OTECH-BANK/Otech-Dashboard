@@ -6,16 +6,35 @@ import { ButtonModule } from "components/ui/Button/Button"
 import ExportIcon from "public/export-icon"
 import { SearchModule } from "components/ui/Search/search-module"
 import EmptyState from "public/empty-state"
-import { Account } from "components/ui/Modal/transaction-detail-modal"
-import { businessData } from "utils"
 import DisableBusinessModal from "components/ui/Modal/disable-business-modal"
 import DeleteModal from "components/ui/Modal/delete-modal"
+import { useGetBusinessesQuery } from "lib/redux/api"
 
 type SortOrder = "asc" | "desc" | null
 
+interface Business {
+  createBy: string
+  businessID: number
+  name: string
+  brandName: string
+  appId: string
+  logo: string
+  website: string
+  callbackUrl: string
+  email: string
+  hmacKey: string
+  apiKeyMask: string
+  accountNumber: string | null
+  depositFeePercent: number
+  depositFeeFlat: number
+  depositFeeCap: number
+  status?: "Active" | "Disabled" | "Deleted"
+  dateCreated: string
+}
+
 interface ActionDropdownProps {
-  account: Account
-  onViewDetails: (account: Account) => void
+  business: Business
+  onViewDetails: (business: Business) => void
 }
 
 const AllBusinessTable = () => {
@@ -23,20 +42,25 @@ const AllBusinessTable = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [error, setError] = useState<string | null>(null)
-  const [orders, setOrders] = useState<Account[]>(businessData)
-  const [selectedBusiness, setSelectedBusiness] = useState<Account | null>(null)
+  const [pageSize] = useState(10)
+  const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null)
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // State to handle modal for transaction details
-  const [selectedOrder, setSelectedOrder] = useState<Account | null>(null)
-  const [isOrderDetailModalOpen, setIsOrderDetailModalOpen] = useState(false)
+  const { data, error, isLoading, refetch } = useGetBusinessesQuery({
+    pageNumber: currentPage,
+    pageSize: pageSize,
+  })
 
-  const getPaymentStyle = (paymentStatus: string) => {
-    switch (paymentStatus) {
-      case "Completed":
+  // Add this effect to refetch data when component mounts
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  const getPaymentStyle = (status: string) => {
+    switch (status) {
+      case "Active":
         return { backgroundColor: "#EEF5F0", color: "#589E67" }
       case "Disabled":
         return { backgroundColor: "#FBF4EC", color: "#D28E3D" }
@@ -47,9 +71,9 @@ const AllBusinessTable = () => {
     }
   }
 
-  const dotStyle = (paymentStatus: string) => {
-    switch (paymentStatus) {
-      case "Completed":
+  const dotStyle = (status: string) => {
+    switch (status) {
+      case "Active":
         return { backgroundColor: "#589E67" }
       case "Disabled":
         return { backgroundColor: "#D28E3D" }
@@ -60,35 +84,23 @@ const AllBusinessTable = () => {
     }
   }
 
-  const toggleSort = (column: keyof Account) => {
+  const toggleSort = (column: keyof Business) => {
     const isAscending = sortColumn === column && sortOrder === "asc"
     setSortOrder(isAscending ? "desc" : "asc")
     setSortColumn(column)
-
-    const sortedOrders = [...orders].sort((a, b) => {
-      if (a[column] < b[column]) return isAscending ? 1 : -1
-      if (a[column] > b[column]) return isAscending ? -1 : 1
-      return 0
-    })
-
-    setOrders(sortedOrders)
   }
 
   const handleCancelSearch = () => {
     setSearchText("")
   }
 
-  const filteredOrders = orders.filter((account) =>
-    Object.values(account).some((value) => {
-      if (value === null || value === undefined) return false
-      return String(value).toLowerCase().includes(searchText.toLowerCase())
-    })
-  )
-
-  const itemsPerPage = 10
-  const indexOfLastOrder = currentPage * itemsPerPage
-  const indexOfFirstOrder = indexOfLastOrder - itemsPerPage
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder)
+  const filteredBusinesses =
+    data?.data.filter((business) =>
+      Object.values(business).some((value) => {
+        if (value === null || value === undefined) return false
+        return String(value).toLowerCase().includes(searchText.toLowerCase())
+      })
+    ) || []
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
@@ -96,15 +108,9 @@ const AllBusinessTable = () => {
     setIsProcessing(true)
     try {
       // Here you would typically call your API to disable the business
-      console.log("Disabling business:", selectedBusiness?.accountId, "Reason:", reason)
+      console.log("Disabling business:", selectedBusiness?.businessID, "Reason:", reason)
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      // Update local state
-      setOrders(
-        orders.map((order) =>
-          order.accountId === selectedBusiness?.accountId ? { ...order, accountStatus: "Disabled" } : order
-        )
-      )
       setIsDisableModalOpen(false)
     } catch (error) {
       console.error("Error disabling business:", error)
@@ -117,11 +123,9 @@ const AllBusinessTable = () => {
     setIsProcessing(true)
     try {
       // Here you would typically call your API to delete the business
-      console.log("Deleting business:", selectedBusiness?.accountId, "Reason:", reason)
+      console.log("Deleting business:", selectedBusiness?.businessID, "Reason:", reason)
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      // Update local state
-      setOrders(orders.filter((order) => order.accountId !== selectedBusiness?.accountId))
       setIsDeleteModalOpen(false)
     } catch (error) {
       console.error("Error deleting business:", error)
@@ -130,7 +134,7 @@ const AllBusinessTable = () => {
     }
   }
 
-  const ActionDropdown: React.FC<ActionDropdownProps> = ({ account, onViewDetails }) => {
+  const ActionDropdown: React.FC<ActionDropdownProps> = ({ business, onViewDetails }) => {
     const [isOpen, setIsOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -159,10 +163,10 @@ const AllBusinessTable = () => {
           <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
               <a
-                href="businesses/business-detail"
+                href={`businesses/${business.businessID}`}
                 className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => {
-                  onViewDetails(account)
+                  onViewDetails(business)
                   setIsOpen(false)
                 }}
               >
@@ -171,7 +175,7 @@ const AllBusinessTable = () => {
               <button
                 className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => {
-                  setSelectedBusiness(account)
+                  setSelectedBusiness(business)
                   setIsDisableModalOpen(true)
                   setIsOpen(false)
                 }}
@@ -181,7 +185,7 @@ const AllBusinessTable = () => {
               <button
                 className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => {
-                  setSelectedBusiness(account)
+                  setSelectedBusiness(business)
                   setIsDeleteModalOpen(true)
                   setIsOpen(false)
                 }}
@@ -191,6 +195,60 @@ const AllBusinessTable = () => {
             </div>
           </div>
         )}
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
+        {/* Header Skeleton */}
+        <div className="items-center justify-between border-b py-2 md:flex md:py-4">
+          <div className="h-8 w-40 animate-pulse rounded bg-gray-200 max-sm:pb-3"></div>
+          <div className="flex gap-4">
+            <div className="h-10 w-64 animate-pulse rounded-md bg-gray-200"></div>
+            <div className="h-10 w-24 animate-pulse rounded-md bg-gray-200"></div>
+          </div>
+        </div>
+
+        {/* Table Skeleton */}
+        <div className="w-full overflow-x-auto border-l border-r bg-[#f9f9f9]">
+          <table className="w-full min-w-[800px] border-separate border-spacing-0 text-left">
+            <thead>
+              <tr>
+                {[...Array(8)].map((_, i) => (
+                  <th key={i} className="whitespace-nowrap border-b p-4">
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, rowIndex) => (
+                <tr key={rowIndex}>
+                  {[...Array(8)].map((_, cellIndex) => (
+                    <td key={cellIndex} className="whitespace-nowrap border-b px-4 py-3">
+                      <div
+                        className="h-4 animate-pulse rounded bg-gray-200"
+                        style={{ width: cellIndex === 1 ? "180px" : "120px" }}
+                      ></div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Skeleton */}
+        <div className="flex items-center justify-between border-t px-4 py-3">
+          <div className="h-4 w-40 animate-pulse rounded bg-gray-200"></div>
+          <div className="flex gap-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-7 w-7 animate-pulse rounded-full bg-gray-200"></div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
@@ -219,17 +277,17 @@ const AllBusinessTable = () => {
       </div>
 
       {error ? (
-        <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
-          <div className="text-center">
+        <div className="flex h-60 flex-col items-center justify-center  bg-[#f9f9f9]">
+          <div className="flex flex-col items-center justify-center  text-center">
             <EmptyState />
-            <p className="text-xl font-bold text-[#D82E2E]">Failed to load transactions.</p>
+            <p className="mt-2 text-xl font-bold text-[#D82E2E]">Failed to load businesses.</p>
             <p>Please refresh or try again later.</p>
           </div>
         </div>
-      ) : filteredOrders.length === 0 ? (
+      ) : filteredBusinesses.length === 0 ? (
         <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
           <EmptyState />
-          <p className="text-base font-bold text-[#202B3C]">No transactions found.</p>
+          <p className="text-base font-bold text-[#202B3C]">No businesses found.</p>
         </div>
       ) : (
         <>
@@ -239,58 +297,57 @@ const AllBusinessTable = () => {
                 <tr>
                   <th
                     className="flex cursor-pointer items-center gap-2 whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("accountId")}
+                    onClick={() => toggleSort("businessID")}
                   >
                     <MdOutlineCheckBoxOutlineBlank className="text-lg" />
                     Business ID <RxCaretSort />
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("customer")}
+                    onClick={() => toggleSort("name")}
                   >
                     <div className="flex items-center gap-2">
                       Business Name <RxCaretSort />
                     </div>
                   </th>
-
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("accountNo")}
+                    onClick={() => toggleSort("brandName")}
                   >
                     <div className="flex items-center gap-2">
-                      Account Number <RxCaretSort />
+                      Brand Name <RxCaretSort />
                     </div>
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("accountBalance")}
+                    onClick={() => toggleSort("website")}
                   >
                     <div className="flex items-center gap-2">
-                      Account Balance <RxCaretSort />
+                      Website <RxCaretSort />
                     </div>
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("points")}
+                    onClick={() => toggleSort("callbackUrl")}
                   >
                     <div className="flex items-center gap-2">
-                      Points <RxCaretSort />
+                      Webhook <RxCaretSort />
                     </div>
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("dateCreated")}
+                    onClick={() => toggleSort("email")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Email <RxCaretSort />
+                    </div>
+                  </th>
+                  <th
+                    className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
+                    onClick={() => toggleSort("status")}
                   >
                     <div className="flex items-center gap-2">
                       Status <RxCaretSort />
-                    </div>
-                  </th>
-                  <th
-                    className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("date")}
-                  >
-                    <div className="flex items-center gap-2">
-                      Date Created <RxCaretSort />
                     </div>
                   </th>
                   <th className="whitespace-nowrap border-b p-4 text-sm">
@@ -299,71 +356,57 @@ const AllBusinessTable = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentOrders.map((order, index) => (
-                  <tr key={index}>
+                {filteredBusinesses.map((business) => (
+                  <tr key={business.businessID}>
                     <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
                       <div className="flex items-center gap-2">
                         <MdOutlineCheckBoxOutlineBlank className="text-lg" />
-                        {order.accountId}
+                        {business.businessID}
                       </div>
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
                       <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#EDF0F4]">
-                          <p>RB</p>
-                        </div>
-                        <div className="flex flex-col gap-0">
-                          <p className="m-0 inline-block  leading-none text-[#202B3C]">{order.customer}</p>
-                          <small className="text-grey-400 m-0 inline-block text-sm leading-none">{order.gmail}</small>
-                        </div>
+                        {business.logo ? (
+                          <img src={business.logo} alt={business.name} className="h-8 w-8 rounded-md object-cover" />
+                        ) : (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#EDF0F4]">
+                            {business.name.charAt(0)}
+                          </div>
+                        )}
+                        <p className="m-0 inline-block leading-none text-[#202B3C]">{business.name}</p>
                       </div>
                     </td>
-                    <td className="flex items-center gap-2 whitespace-nowrap border-b px-4 py-2 text-sm">
-                      <img src="/card-sm-1.png" alt="" className=" w-12" />
-                      <div className="flex flex-col  gap-0">
-                        <p className="m-0 inline-block font-bold leading-none text-[#202B3C]">{order.accountNo}</p>
-                        <small className="text-grey-400 m-0 inline-block text-sm leading-none">
-                          {order.accountType}
-                        </small>
-                      </div>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">{business.brandName}</td>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      <a
+                        href={business.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {business.website}
+                      </a>
                     </td>
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-grey-400">NGN</span>
-                        {order.accountBalance}
-                      </div>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      <div className="max-w-[200px] truncate">{business.callbackUrl || "N/A"}</div>
                     </td>
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex">
-                        <div className="flex items-center justify-center gap-1 rounded-full px-2 py-1">
-                          {order.points}
-                        </div>
-                      </div>
-                    </td>
-
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">{business.email}</td>
                     <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
                       <div className="flex">
                         <div
-                          style={getPaymentStyle(order.accountStatus)}
+                          style={getPaymentStyle(business.status || "Active")}
                           className="flex items-center justify-center gap-1 rounded-full px-2 py-1"
                         >
-                          <span className="size-2 rounded-full" style={dotStyle(order.accountStatus)}></span>
-                          {order.accountStatus}
+                          <span className="size-2 rounded-full" style={dotStyle(business.status || "Active")}></span>
+                          {business.status || "Active"}
                         </div>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <img src="/DashboardImages/Calendar.png" alt="dekalo" />
-                        {order.date}
                       </div>
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
                       <ActionDropdown
-                        account={order}
-                        onViewDetails={(account) => {
-                          setSelectedOrder(account)
-                          setIsOrderDetailModalOpen(true)
+                        business={business}
+                        onViewDetails={(business) => {
+                          setSelectedBusiness(business)
                         }}
                       />
                     </td>
@@ -376,8 +419,8 @@ const AllBusinessTable = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t px-4 py-3">
             <div className="text-sm text-gray-700">
-              Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, filteredOrders.length)} of{" "}
-              {filteredOrders.length} entries
+              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, data?.totalRecords || 0)}{" "}
+              of {data?.totalRecords || 0} entries
             </div>
             <div className="flex gap-2">
               <button
@@ -389,7 +432,7 @@ const AllBusinessTable = () => {
               >
                 <MdOutlineArrowBackIosNew />
               </button>
-              {Array.from({ length: Math.ceil(filteredOrders.length / itemsPerPage) }).map((_, index) => (
+              {Array.from({ length: Math.ceil((data?.totalRecords || 0) / pageSize) }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => paginate(index + 1)}
@@ -402,9 +445,9 @@ const AllBusinessTable = () => {
               ))}
               <button
                 onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === Math.ceil(filteredOrders.length / itemsPerPage)}
+                disabled={currentPage === Math.ceil((data?.totalRecords || 0) / pageSize)}
                 className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                  currentPage === Math.ceil(filteredOrders.length / itemsPerPage)
+                  currentPage === Math.ceil((data?.totalRecords || 0) / pageSize)
                     ? "cursor-not-allowed bg-gray-200 text-gray-500"
                     : "bg-gray-200 hover:bg-gray-300"
                 }`}
@@ -421,7 +464,7 @@ const AllBusinessTable = () => {
         onRequestClose={() => setIsDisableModalOpen(false)}
         onConfirm={handleDisable}
         loading={isProcessing}
-        businessName={selectedBusiness?.customer || ""}
+        businessName={selectedBusiness?.name || ""}
       />
 
       <DeleteModal
@@ -429,7 +472,7 @@ const AllBusinessTable = () => {
         onRequestClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
         loading={isProcessing}
-        businessName={selectedBusiness?.customer || ""}
+        businessName={selectedBusiness?.name || ""}
       />
     </div>
   )

@@ -1,27 +1,24 @@
+// src/app/dashboard/page.tsx
 "use client"
+
 import DashboardNav from "components/Navbar/DashboardNav"
-import FinanceChart from "components/Chart/FinanceChart"
-
-import TotalAssets from "public/total-assets"
-import TransactionIcon from "public/transaction-icon"
-import AccountIcon from "public/accounts-icon"
-import WarningIcon from "public/warning-icon"
-import CustomerIcon from "public/customer-icon"
 import { ButtonModule } from "components/ui/Button/Button"
-import InsightIcon from "public/insight-icon"
-import ExchangeRateMarquee from "components/ui/ExchangeRate/exchange-rate"
-import TransactionTable from "components/Tables/TransactionTable"
-import DebitFeesTable from "components/Tables/DebitFeesTable"
 import AddBusiness from "public/add-business"
-
-interface PaymentAccount {
-  id: number
-  src: any
-  name: string
-  balance: string
-}
+import DebitFeesTable from "components/Tables/DebitFeesTable"
+import { useState } from "react"
+import AddDebitFeeModal from "components/ui/Modal/add-debit-fees-modal"
+import CalculateDebitFeeModal from "components/ui/Modal/calculate-debit-fee-modal"
 
 export default function Dashboard() {
+  const [isAddFeeModalOpen, setIsAddFeeModalOpen] = useState(false)
+  const [isCalculateModalOpen, setIsCalculateModalOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  const handleSuccess = () => {
+    setRefreshKey((prev) => prev + 1)
+    setIsAddFeeModalOpen(false)
+  }
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
@@ -29,27 +26,44 @@ export default function Dashboard() {
           <DashboardNav />
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
-              <p className="text-2xl font-medium">Debit Feees</p>
-              {/* Replacing the previous button group with the real-time exchange rates marquee */}
-              <ButtonModule
-                variant="primary"
-                size="md"
-                icon={<AddBusiness />}
-                iconPosition="start"
-                // onClick={() => setIsAddBusinessModalOpen(true)}
-              >
-                Add New Fee
-              </ButtonModule>
+              <p className="text-2xl font-medium">Debit Fees</p>
+              <div className="flex gap-4">
+                <ButtonModule
+                  variant="primary"
+                  size="md"
+                  icon={<AddBusiness />}
+                  iconPosition="start"
+                  onClick={() => setIsAddFeeModalOpen(true)}
+                >
+                  Add New Fee
+                </ButtonModule>
+                <ButtonModule
+                  variant="black"
+                  size="md"
+                  iconPosition="start"
+                  onClick={() => setIsCalculateModalOpen(true)}
+                >
+                  Calculate Debit Fees
+                </ButtonModule>
+              </div>
             </div>
 
             <div className="max-sm-my-4 flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">
               <div className="w-full">
-                <DebitFeesTable />
+                <DebitFeesTable refreshKey={refreshKey} />
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <AddDebitFeeModal
+        isOpen={isAddFeeModalOpen}
+        onRequestClose={() => setIsAddFeeModalOpen(false)}
+        onSuccess={handleSuccess}
+      />
+
+      <CalculateDebitFeeModal isOpen={isCalculateModalOpen} onRequestClose={() => setIsCalculateModalOpen(false)} />
     </section>
   )
 }

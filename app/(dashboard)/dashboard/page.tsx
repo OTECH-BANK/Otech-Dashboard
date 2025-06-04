@@ -10,7 +10,7 @@ import CustomerIcon from "public/customer-icon"
 import { ButtonModule } from "components/ui/Button/Button"
 import InsightIcon from "public/insight-icon"
 import ExchangeRateMarquee from "components/ui/ExchangeRate/exchange-rate"
-import TransactionTable from "components/Tables/TransactionTable"
+import RecentTransactionTable from "components/Tables/TransactionTable"
 
 interface PaymentAccount {
   id: number
@@ -160,7 +160,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                <TransactionTable />
+                <RecentTransactionTable />
               </div>
             </div>
           </div>

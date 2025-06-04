@@ -4,6 +4,9 @@ import React from "react"
 import Modal from "react-modal"
 import CloseIcon from "public/close-icon"
 import { ButtonModule } from "../Button/Button"
+import { useDispatch } from "react-redux"
+import { logout } from "lib/redux/features/auth/authSlice"
+import { useRouter } from "next/navigation"
 
 // Define the props for the modal
 interface LogoutModalProps {
@@ -14,6 +17,13 @@ interface LogoutModalProps {
 }
 
 const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onRequestClose, onConfirm, loading }) => {
+  const dispatch = useDispatch()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    dispatch(logout())
+    router.push("/signin/otech")
+  }
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +40,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onRequestClose, onCon
       <div className="px-4 pb-6">
         <p className="my-4">Are you sure you want to log out?</p>
         <div className="flex justify-end gap-4">
-          <ButtonModule type="submit" variant="danger" size="lg" className="w-full" onClick={onConfirm}>
+          <ButtonModule type="submit" variant="danger" size="lg" className="w-full" onClick={handleLogout}>
             {loading ? (
               <div className="flex items-center justify-center">
                 <svg

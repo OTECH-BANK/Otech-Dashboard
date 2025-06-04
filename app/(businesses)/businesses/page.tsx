@@ -1,7 +1,6 @@
 "use client"
 import DashboardNav from "components/Navbar/DashboardNav"
 import ArrowIcon from "public/arrow-icon"
-import AllAccountsTable from "components/Tables/AllAccountsTable"
 import BusinessIcon from "public/business-icon"
 import RecentlyAdded from "public/recently-added"
 import TotalBusiness from "public/total-business"
@@ -20,8 +19,9 @@ interface PaymentAccount {
 }
 
 export default function AllTransactions() {
-  const [isAddBusinessModalOpen, setIsAddBusinessModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isAddBusinessModalOpen, setIsAddBusinessModalOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0) // Add refresh key state
 
   const handleAddBusiness = async (businessData: { name: string; email: string; phone: string; address: string }) => {
     setIsSubmitting(true)
@@ -38,6 +38,12 @@ export default function AllTransactions() {
       setIsSubmitting(false)
     }
   }
+
+  const handleBusinessAdded = () => {
+    setRefreshKey((prev) => prev + 1) // Increment key to force table refresh
+    setIsAddBusinessModalOpen(false) // Close modal
+  }
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
@@ -152,7 +158,7 @@ export default function AllTransactions() {
                     </div>
                   </div>
                 </div>
-                <AllBusinessTable />
+                <AllBusinessTable key={refreshKey} />
               </div>
             </div>
           </div>
@@ -161,8 +167,7 @@ export default function AllTransactions() {
       <AddBusinessModal
         isOpen={isAddBusinessModalOpen}
         onRequestClose={() => setIsAddBusinessModalOpen(false)}
-        onSubmit={handleAddBusiness}
-        loading={isSubmitting}
+        onSuccess={handleBusinessAdded} // Callback when form submits successfully
       />
     </section>
   )

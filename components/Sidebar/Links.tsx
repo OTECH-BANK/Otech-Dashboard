@@ -10,7 +10,15 @@ import SettingIcon from "public/setting-icon"
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: DashboardIcon },
   { name: "Transactions", href: "/transactions", icon: Pricing },
-  { name: "Customers", href: "/customers", icon: ServiceIcon },
+  {
+    name: "Customers",
+    href: "",
+    icon: ServiceIcon,
+    sublinks: [
+      { name: "Approved Customers", href: "/customers/approved" },
+      { name: "Pending Approval", href: "/customers/pending-approval" },
+    ],
+  },
   { name: "Virtual Accounts", href: "/virtual-accounts", icon: NoteIcon },
   { name: "Businesses", href: "/businesses", icon: BusinessLogo },
   { name: "Employees", href: "/employee", icon: EmployeeLogo },

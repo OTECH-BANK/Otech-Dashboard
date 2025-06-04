@@ -158,12 +158,7 @@ export default function AllTransactions() {
           </div>
         </div>
       </div>
-      <AddBusinessModal
-        isOpen={isAddBusinessModalOpen}
-        onRequestClose={() => setIsAddBusinessModalOpen(false)}
-        onSubmit={handleAddBusiness}
-        loading={isSubmitting}
-      />
+      <AddBusinessModal isOpen={isAddBusinessModalOpen} onRequestClose={() => setIsAddBusinessModalOpen(false)} />
     </section>
   )
 }

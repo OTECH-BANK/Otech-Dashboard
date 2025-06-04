@@ -19,7 +19,7 @@ type SortOrder = "asc" | "desc" | null
 type Order = {
   orderId: string
   customer: string
-  doorModel: string
+  beneficiary: string
   payment30: string
   amount30: string
   payment70: string
@@ -89,7 +89,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12345",
       customer: "Robert Fox",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       payment30: "Paid",
       amount30: "₹3,500,000",
       payment70: "Pending",
@@ -101,7 +101,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12346",
       customer: "Robert Lee",
-      doorModel: "Alima Elite",
+      beneficiary: "Alima Elite",
       payment30: "Paid",
       amount30: "₹3,500,000",
       payment70: "Paid",
@@ -113,7 +113,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12347",
       customer: "Robert Chang",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       payment30: "Not Paid",
       amount30: "₹3,500,000",
       payment70: "Not Paid",
@@ -125,7 +125,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12348",
       customer: "Robert Lee",
-      doorModel: "Alima Elite",
+      beneficiary: "Alima Elite",
       payment30: "Paid",
       amount30: "₹3,500,000",
       payment70: "Pending",
@@ -137,7 +137,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12349",
       customer: "Robert Lee",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       amount30: "₹3,500,000",
       payment30: "Pending",
       payment70: "Pending",
@@ -149,7 +149,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12345",
       customer: "Robert Fox",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       payment30: "Paid",
       amount30: "₹3,500,000",
       payment70: "Pending",
@@ -161,7 +161,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12346",
       customer: "Robert Lee",
-      doorModel: "Alima Elite",
+      beneficiary: "Alima Elite",
       payment30: "Paid",
       amount30: "₹3,500,000",
       payment70: "Paid",
@@ -173,7 +173,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12347",
       customer: "Robert Chang",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       payment30: "Not Paid",
       amount30: "₹3,500,000",
       payment70: "Not Paid",
@@ -185,7 +185,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12348",
       customer: "Robert Lee",
-      doorModel: "Alima Elite",
+      beneficiary: "Alima Elite",
       payment30: "Paid",
       amount30: "₹3,500,000",
       payment70: "Pending",
@@ -197,7 +197,7 @@ const PaymentTable = () => {
     {
       orderId: "#ORD12349",
       customer: "Robert Lee",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       amount30: "₹3,500,000",
       payment30: "Pending",
       payment70: "Pending",
@@ -208,7 +208,7 @@ const PaymentTable = () => {
     },
   ])
 
-  const doorModelIcons: Record<string, React.ReactNode> = {
+  const beneficiaryIcons: Record<string, React.ReactNode> = {
     "Alima Core": <PiShieldChevronFill className="size-5" />,
     "Alima Elite": <PiShieldPlusFill className="size-5" />,
   }
@@ -344,7 +344,7 @@ const PaymentTable = () => {
 
               <th
                 className="cursor-pointer whitespace-nowrap border-b border-l p-4 text-sm"
-                onClick={() => toggleSort("doorModel")}
+                onClick={() => toggleSort("beneficiary")}
               >
                 <p className="flex items-center gap-2">
                   Door Model <RxCaretSort />
@@ -416,8 +416,8 @@ const PaymentTable = () => {
 
                 <td className="whitespace-nowrap border-b border-l px-4 py-2 text-sm">
                   <div className="flex items-center gap-2">
-                    {doorModelIcons[order.doorModel]}
-                    {order.doorModel}
+                    {beneficiaryIcons[order.beneficiary]}
+                    {order.beneficiary}
                   </div>
                 </td>
 

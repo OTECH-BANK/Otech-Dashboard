@@ -21,7 +21,7 @@ type Order = {
   customer: string
   email: string
   phone: string
-  doorModel: string
+  beneficiary: string
   units: number
   payment30: string
   payment70: string
@@ -92,7 +92,7 @@ const CustomerOrders = () => {
       customer: "Robert Fox",
       email: "robertfox@example.com",
       phone: "(671) 555-0110",
-      doorModel: "Alima Core",
+      beneficiary: "Alima Core",
       units: 200,
       payment30: "Paid",
       payment70: "Pending",
@@ -105,7 +105,7 @@ const CustomerOrders = () => {
       customer: "Robert Lee",
       email: "robertlee@example.com",
       phone: "(671) 855-0110",
-      doorModel: "Alima Elite",
+      beneficiary: "Alima Elite",
       units: 210,
       payment30: "Paid",
       payment70: "Paid",
@@ -115,7 +115,7 @@ const CustomerOrders = () => {
     },
   ])
 
-  const doorModelIcons: Record<string, React.ReactNode> = {
+  const beneficiaryIcons: Record<string, React.ReactNode> = {
     "Alima Core": <PiShieldChevronFill className="size-5" />,
     "Alima Elite": <PiShieldPlusFill className="size-5" />,
   }
@@ -246,7 +246,7 @@ const CustomerOrders = () => {
 
               <th
                 className="cursor-pointer whitespace-nowrap border-b border-l p-4 text-sm"
-                onClick={() => toggleSort("doorModel")}
+                onClick={() => toggleSort("beneficiary")}
               >
                 <p className="flex items-center gap-2">
                   Door Model <RxCaretSort />
@@ -318,8 +318,8 @@ const CustomerOrders = () => {
 
                 <td className="whitespace-nowrap border-b border-l px-4 py-2 text-sm">
                   <div className="flex items-center gap-2">
-                    {doorModelIcons[order.doorModel]}
-                    {order.doorModel}
+                    {beneficiaryIcons[order.beneficiary]}
+                    {order.beneficiary}
                   </div>
                 </td>
                 <td className="whitespace-nowrap border-b border-l px-4 py-3 text-sm">

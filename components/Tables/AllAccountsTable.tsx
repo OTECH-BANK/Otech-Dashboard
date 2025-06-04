@@ -1,28 +1,26 @@
 "use client"
-
 import React, { useEffect, useRef, useState } from "react"
 import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
 import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos, MdOutlineCheckBoxOutlineBlank } from "react-icons/md"
-import OutgoingIcon from "public/outgoing-icon"
-import IncomingIcon from "public/incoming-icon"
-import { ButtonModule } from "components/ui/Button/Button"
+import { useRouter } from "next/navigation"
 import ExportIcon from "public/export-icon"
-import { SearchModule } from "components/ui/Search/search-module"
-import { getBankLogo } from "components/ui/BanksLogo/bank-logo"
 import EmptyState from "public/empty-state"
-import TransactionDetailModal, { Account, Order } from "components/ui/Modal/transaction-detail-modal"
-import { accountsData } from "utils"
+import { ButtonModule } from "components/ui/Button/Button"
+import { SearchModule } from "components/ui/Search/search-module"
+
+import { Customer, useGetCustomersQuery } from "lib/redux/customerApi"
 
 type SortOrder = "asc" | "desc" | null
 
 interface ActionDropdownProps {
-  account: Account
-  onViewDetails: (account: Account) => void
+  customer: Customer
+  onViewDetails: (customer: Customer) => void
 }
 
-const ActionDropdown: React.FC<ActionDropdownProps> = ({ account, onViewDetails }) => {
+const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,6 +35,17 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ account, onViewDetails 
     }
   }, [])
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault()
+    // 1) Store the entire “customer” object in localStorage (so the detail page can read it).
+    localStorage.setItem("selectedCustomer", JSON.stringify(customer))
+    onViewDetails(customer)
+    setIsOpen(false)
+
+    // 2) Navigate to `/customers/customer-detail/{customerID}`
+    router.push(`/customers/customer-detail/${customer.customerID}`)
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
@@ -49,19 +58,17 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ account, onViewDetails 
         <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             <a
-              href="customers/customer-detail"
+              // We don’t need a real `href` because we call push() programmatically
+              href={`/customers/customer-detail/${customer.customerID}`}
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                onViewDetails(account)
-                setIsOpen(false)
-              }}
+              onClick={handleViewDetails}
             >
               View Details
             </a>
             <button
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => {
-                console.log("Edit order:", account.accountId)
+                console.log("Freeze customer:", customer.customerID)
                 setIsOpen(false)
               }}
             >
@@ -70,7 +77,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ account, onViewDetails 
             <button
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => {
-                console.log("Delete order:", account.accountId)
+                console.log("Delete customer:", customer.customerID)
                 setIsOpen(false)
               }}
             >
@@ -83,114 +90,118 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ account, onViewDetails 
   )
 }
 
-const AllTransactionTable = () => {
+const LoadingSkeleton = () => {
+  return (
+    <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
+      {/* Header Skeleton */}
+      <div className="items-center justify-between border-b py-2 md:flex md:py-4">
+        <div className="h-8 w-40 animate-pulse rounded bg-gray-200"></div>
+        <div className="mt-3 flex gap-4 md:mt-0">
+          <div className="h-10 w-48 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-10 w-24 animate-pulse rounded bg-gray-200"></div>
+        </div>
+      </div>
+
+      {/* Table Skeleton */}
+      <div className="w-full overflow-x-auto border-l border-r bg-[#f9f9f9]">
+        <table className="w-full min-w-[800px] border-separate border-spacing-0 text-left">
+          <thead>
+            <tr>
+              {[...Array(8)].map((_, i) => (
+                <th key={i} className="whitespace-nowrap border-b p-4">
+                  <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(5)].map((_, rowIndex) => (
+              <tr key={rowIndex}>
+                {[...Array(8)].map((_, cellIndex) => (
+                  <td key={cellIndex} className="whitespace-nowrap border-b px-4 py-3">
+                    <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Skeleton */}
+      <div className="flex items-center justify-between border-t px-4 py-3">
+        <div className="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
+        <div className="flex gap-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-7 w-7 animate-pulse rounded-full bg-gray-200"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CustomersTable: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [error, setError] = useState<string | null>(null)
-  const [orders, setOrders] = useState<Account[]>(accountsData)
+  const pageSize = 10
 
-  // State to handle modal for transaction details
-  const [selectedOrder, setSelectedOrder] = useState<Account | null>(null)
-  const [isOrderDetailModalOpen, setIsOrderDetailModalOpen] = useState(false)
+  // Fetch customers using RTK Query
+  const {
+    data: customersResponse,
+    isLoading,
+    isError,
+  } = useGetCustomersQuery({
+    pageNumber: currentPage,
+    pageSize: pageSize,
+  })
 
-  const getPaymentStyle = (paymentStatus: string) => {
-    switch (paymentStatus) {
-      case "Paid":
-      case "Completed":
-        return { backgroundColor: "#EEF5F0", color: "#589E67" }
-      case "Pending":
-        return { backgroundColor: "#FBF4EC", color: "#D28E3D" }
-      case "Not Paid":
-        return { backgroundColor: "#F7EDED", color: "#AF4B4B" }
-      case "Confirmed":
-        return { backgroundColor: "#EDF2FE", color: "#4976F4" }
-      case "Reverted":
-        return { backgroundColor: "#F4EDF7", color: "#954BAF" }
-      case "Cancelled":
-        return { backgroundColor: "#F7EDED", color: "#AF4B4B" }
-      default:
-        return {}
-    }
+  const customerItems = customersResponse?.data || []
+  // We only extract the `.customer` object here for listing
+  const customers = customerItems.map((item) => item.customer)
+  const totalRecords = customersResponse?.totalRecords || 0
+
+  // State & Handlers for modals
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [isCustomerDetailModalOpen, setIsCustomerDetailModalOpen] = useState(false)
+
+  const getStatusStyle = (status: boolean) => {
+    return status ? { backgroundColor: "#EEF5F0", color: "#589E67" } : { backgroundColor: "#F7EDED", color: "#AF4B4B" }
   }
 
-  const TypeIcon = ({ type }: { type: string }) => {
-    switch (type) {
-      case "Outgoing":
-        return <OutgoingIcon className="size-2 rounded-full" />
-      case "Incoming":
-        return <IncomingIcon className="size-2 rounded-full" />
-      default:
-        return <span className="size-2 rounded-full" />
-    }
-  }
-
-  const dotStyle = (paymentStatus: string) => {
-    switch (paymentStatus) {
-      case "Paid":
-      case "Completed":
-        return { backgroundColor: "#589E67" }
-      case "Pending":
-        return { backgroundColor: "#D28E3D" }
-      case "Not Paid":
-      case "Cancelled":
-        return { backgroundColor: "#AF4B4B" }
-      case "Confirmed":
-        return { backgroundColor: "#4976F4" }
-      case "Reverted":
-        return { backgroundColor: "#954BAF" }
-      default:
-        return {}
-    }
-  }
-
-  const toggleSort = (column: keyof Account) => {
+  const toggleSort = (column: keyof Customer) => {
     const isAscending = sortColumn === column && sortOrder === "asc"
     setSortOrder(isAscending ? "desc" : "asc")
     setSortColumn(column)
-
-    const sortedOrders = [...orders].sort((a, b) => {
-      if (a[column] < b[column]) return isAscending ? 1 : -1
-      if (a[column] > b[column]) return isAscending ? -1 : 1
-      return 0
-    })
-
-    setOrders(sortedOrders)
   }
 
   const handleCancelSearch = () => {
     setSearchText("")
   }
 
-  const filteredOrders = orders.filter((account) =>
-    Object.values(account).some((value) => {
+  const filteredCustomers = customers.filter((customer) =>
+    Object.values(customer).some((value) => {
       if (value === null || value === undefined) return false
       return String(value).toLowerCase().includes(searchText.toLowerCase())
     })
   )
 
-  const itemsPerPage = 10
-  const indexOfLastOrder = currentPage * itemsPerPage
-  const indexOfFirstOrder = indexOfLastOrder - itemsPerPage
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder)
-
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
-  const BankLogo = ({ bankName }: { bankName: string }) => {
-    const logo = getBankLogo(bankName)
-    if (!logo) {
-      return (
-        <div className="flex items-center gap-2">
-          <img src="/DashboardImages/Package.png" alt="Default bank" className="icon-style h-5 w-5" />
-          <img src="/DashboardImages/Package-dark.png" alt="Default bank dark" className="dark-icon-style h-5 w-5" />
-        </div>
-      )
-    }
+  if (isLoading) {
+    return <LoadingSkeleton />
+  }
+
+  if (isError) {
     return (
-      <div className="flex items-center gap-2">
-        <img src={logo.light} alt={logo.alt} className="icon-style h-5 w-5" />
-        {logo.dark && <img src={logo.dark} alt={logo.alt} className="dark-icon-style h-5 w-5" />}
+      <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
+        <div className="text-center">
+          <EmptyState />
+          <p className="text-xl font-bold text-[#D82E2E]">Failed to load customers.</p>
+          <p>Please refresh or try again later.</p>
+        </div>
       </div>
     )
   }
@@ -199,7 +210,7 @@ const AllTransactionTable = () => {
     <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
       {/* Header */}
       <div className="items-center justify-between border-b py-2 md:flex md:py-4">
-        <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">All Accounts</p>
+        <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">All Customers</p>
         <div className="flex gap-4">
           <SearchModule
             value={searchText}
@@ -211,25 +222,17 @@ const AllTransactionTable = () => {
             size="md"
             icon={<ExportIcon />}
             iconPosition="end"
-            onClick={() => alert("Button clicked!")}
+            onClick={() => alert("Export clicked!")}
           >
             <p className="max-sm:hidden">Export</p>
           </ButtonModule>
         </div>
       </div>
 
-      {error ? (
-        <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
-          <div className="text-center">
-            <EmptyState />
-            <p className="text-xl font-bold text-[#D82E2E]">Failed to load transactions.</p>
-            <p>Please refresh or try again later.</p>
-          </div>
-        </div>
-      ) : filteredOrders.length === 0 ? (
+      {filteredCustomers.length === 0 ? (
         <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
           <EmptyState />
-          <p className="text-base font-bold text-[#202B3C]">No transactions found.</p>
+          <p className="text-base font-bold text-[#202B3C]">No customers found.</p>
         </div>
       ) : (
         <>
@@ -239,47 +242,46 @@ const AllTransactionTable = () => {
                 <tr>
                   <th
                     className="flex cursor-pointer items-center gap-2 whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("accountId")}
+                    onClick={() => toggleSort("customerID")}
                   >
                     <MdOutlineCheckBoxOutlineBlank className="text-lg" />
-                    Account ID <RxCaretSort />
+                    Customer ID <RxCaretSort />
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("customer")}
+                    onClick={() => toggleSort("fullName")}
                   >
                     <div className="flex items-center gap-2">
-                      Account Name <RxCaretSort />
-                    </div>
-                  </th>
-
-                  <th
-                    className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("accountNo")}
-                  >
-                    <div className="flex items-center gap-2">
-                      Account Number <RxCaretSort />
+                      Customer Name <RxCaretSort />
                     </div>
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("accountBalance")}
+                    onClick={() => toggleSort("customerEmailAdd")}
                   >
                     <div className="flex items-center gap-2">
-                      Account Balance <RxCaretSort />
+                      Email <RxCaretSort />
                     </div>
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("points")}
+                    onClick={() => toggleSort("mobile")}
                   >
                     <div className="flex items-center gap-2">
-                      Points <RxCaretSort />
+                      Phone <RxCaretSort />
                     </div>
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("dateCreated")}
+                    onClick={() => toggleSort("customerAddress")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Address <RxCaretSort />
+                    </div>
+                  </th>
+                  <th
+                    className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
+                    onClick={() => toggleSort("customerStatus")}
                   >
                     <div className="flex items-center gap-2">
                       Status <RxCaretSort />
@@ -287,7 +289,7 @@ const AllTransactionTable = () => {
                   </th>
                   <th
                     className="cursor-pointer whitespace-nowrap border-b p-4 text-sm"
-                    onClick={() => toggleSort("date")}
+                    onClick={() => toggleSort("createdate")}
                   >
                     <div className="flex items-center gap-2">
                       Date Created <RxCaretSort />
@@ -299,71 +301,60 @@ const AllTransactionTable = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentOrders.map((order, index) => (
+                {filteredCustomers.map((customer, index) => (
                   <tr key={index}>
                     <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
                       <div className="flex items-center gap-2">
                         <MdOutlineCheckBoxOutlineBlank className="text-lg" />
-                        {order.accountId}
+                        {customer.customerID}
                       </div>
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#EDF0F4]">
-                          <p>RB</p>
+                          {customer.firstName?.charAt(0)}
+                          {customer.lastName?.charAt(0)}
                         </div>
                         <div className="flex flex-col gap-0">
-                          <p className="m-0 inline-block  leading-none text-[#202B3C]">{order.customer}</p>
-                          <small className="text-grey-400 m-0 inline-block text-sm leading-none">{order.gmail}</small>
+                          <p className="m-0 inline-block leading-none text-[#202B3C]">
+                            {customer.fullName || `${customer.firstName} ${customer.lastName}`}
+                          </p>
+                          <small className="text-grey-400 m-0 inline-block text-sm leading-none">
+                            {customer.customerTypeID === 1 ? "Individual" : "Corporate"}
+                          </small>
                         </div>
                       </div>
                     </td>
-                    <td className="flex items-center gap-2 whitespace-nowrap border-b px-4 py-2 text-sm">
-                      <img src="/card-sm-1.png" alt="" className=" w-12" />
-                      <div className="flex flex-col  gap-0">
-                        <p className="m-0 inline-block font-bold leading-none text-[#202B3C]">{order.accountNo}</p>
-                        <small className="text-grey-400 m-0 inline-block text-sm leading-none">
-                          {order.accountType}
-                        </small>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      {customer.customerEmailAdd || "N/A"}
+                    </td>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      {customer.mobile || customer.phoneNumber || "N/A"}
+                    </td>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      {customer.customerAddress || "N/A"}
+                    </td>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      <div
+                        style={getStatusStyle(customer.customerStatus)}
+                        className="flex items-center justify-center gap-1 rounded-full px-2 py-1"
+                      >
+                        <span
+                          className="size-2 rounded-full"
+                          style={{ backgroundColor: customer.customerStatus ? "#589E67" : "#AF4B4B" }}
+                        ></span>
+                        {customer.customerStatus ? "Active" : "Inactive"}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-grey-400">NGN</span>
-                        {order.accountBalance}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex">
-                        <div className="flex items-center justify-center gap-1 rounded-full px-2 py-1">
-                          {order.points}
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex">
-                        <div
-                          style={getPaymentStyle(order.accountStatus)}
-                          className="flex items-center justify-center gap-1 rounded-full px-2 py-1"
-                        >
-                          <span className="size-2 rounded-full" style={dotStyle(order.accountStatus)}></span>
-                          {order.accountStatus}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap border-b px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <img src="/DashboardImages/Calendar.png" alt="dekalo" />
-                        {order.date}
-                      </div>
+                    <td className="whitespace-nowrap border-b px-4 py-2 text-sm">
+                      {new Date(customer.createdate).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
                       <ActionDropdown
-                        account={order}
-                        onViewDetails={(account) => {
-                          setSelectedOrder(account)
-                          setIsOrderDetailModalOpen(true)
+                        customer={customer}
+                        onViewDetails={(cust) => {
+                          setSelectedCustomer(cust)
+                          setIsCustomerDetailModalOpen(true)
                         }}
                       />
                     </td>
@@ -376,8 +367,8 @@ const AllTransactionTable = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t px-4 py-3">
             <div className="text-sm text-gray-700">
-              Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, filteredOrders.length)} of{" "}
-              {filteredOrders.length} entries
+              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalRecords)} of{" "}
+              {totalRecords} entries
             </div>
             <div className="flex gap-2">
               <button
@@ -389,7 +380,7 @@ const AllTransactionTable = () => {
               >
                 <MdOutlineArrowBackIosNew />
               </button>
-              {Array.from({ length: Math.ceil(filteredOrders.length / itemsPerPage) }).map((_, index) => (
+              {Array.from({ length: Math.ceil(totalRecords / pageSize) }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => paginate(index + 1)}
@@ -402,9 +393,9 @@ const AllTransactionTable = () => {
               ))}
               <button
                 onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === Math.ceil(filteredOrders.length / itemsPerPage)}
+                disabled={currentPage === Math.ceil(totalRecords / pageSize)}
                 className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                  currentPage === Math.ceil(filteredOrders.length / itemsPerPage)
+                  currentPage === Math.ceil(totalRecords / pageSize)
                     ? "cursor-not-allowed bg-gray-200 text-gray-500"
                     : "bg-gray-200 hover:bg-gray-300"
                 }`}
@@ -415,18 +406,8 @@ const AllTransactionTable = () => {
           </div>
         </>
       )}
-
-      {/* Transaction Detail Modal
-      <TransactionDetailModal
-        isOpen={isOrderDetailModalOpen}
-        order={selectedOrder} 
-        onRequestClose={() => {
-          setIsOrderDetailModalOpen(false)
-          setSelectedOrder(null)
-        }}
-      /> */}
     </div>
   )
 }
 
-export default AllTransactionTable
+export default CustomersTable

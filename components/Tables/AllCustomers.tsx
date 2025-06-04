@@ -185,7 +185,7 @@ const AllCustomers = () => {
     },
   ])
 
-  const doorModelIcons: Record<string, React.ReactNode> = {
+  const beneficiaryIcons: Record<string, React.ReactNode> = {
     "Alima Core": <PiShieldChevronFill className="size-5" />,
     "Alima Elite": <PiShieldPlusFill className="size-5" />,
   }

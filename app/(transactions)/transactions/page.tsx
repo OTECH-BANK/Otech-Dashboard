@@ -120,7 +120,6 @@ export default function AllTransactions() {
                             </div>
                           </div>
                         </div>
-                        {/* Unresolved ends */}
                       </div>
                     </div>
                   </div>

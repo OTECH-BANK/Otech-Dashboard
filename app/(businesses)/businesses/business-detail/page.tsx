@@ -1,12 +1,8 @@
 "use client"
-import CustomerInfo from "components/CustomerInfo/CustomerInfo"
 import DashboardNav from "components/Navbar/DashboardNav"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import AllTransactionTable from "components/Tables/AllTransactionstable"
 import { ButtonModule } from "components/ui/Button/Button"
-
-import FreezeAccountModal from "components/ui/Modal/freeze-account-modal"
-import GenerateReceiptmodal from "components/ui/Modal/generate-receipt-modal"
 import { useRouter } from "next/navigation"
 
 export default function Dashboard() {
@@ -56,12 +52,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-8 flex w-full gap-6 px-16  max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3">
-              <div className="w-full">
-                <CustomerInfo />
-              </div>
-            </div>
-
             <div className="flex w-full gap-6 px-16 max-md:flex-col  max-md:px-0 max-sm:mb-4 max-sm:px-3 md:my-8">
               <div className="w-full">
                 <AllTransactionTable />
@@ -70,20 +60,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      <FreezeAccountModal
-        isOpen={isFreezeModalOpen}
-        onRequestClose={() => setIsFreezeModalOpen(false)}
-        onConfirm={confirmFreezeAccount}
-        loading={isFreezing}
-      />
-
-      <GenerateReceiptmodal
-        isOpen={isReceiptModalOpen}
-        onRequestClose={() => setIsReceiptModalOpen(false)}
-        onConfirm={confirmFreezeAccount}
-        loading={isFreezing}
-      />
     </section>
   )
 }

@@ -1,7 +1,12 @@
+// SignIn component
 "use client"
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useDispatch, useSelector } from "react-redux"
+import { useLoginMutation } from "lib/redux/api"
+import { loginStart, loginSuccess, loginFailure } from "lib/redux/features/auth/authSlice"
+import { RootState } from "lib/redux/store"
 
 // Importing modular components
 import { PasswordInputModule } from "components/ui/Input/PasswordInput"
@@ -15,28 +20,51 @@ const SignIn: React.FC = () => {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false)
-  const [showErrorNotification, setShowErrorNotification] = useState(false)
 
   const router = useRouter()
+  const dispatch = useDispatch()
+  const [loginApi] = useLoginMutation()
+  const authState = useSelector((state: RootState) => state.auth)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
+    dispatch(loginStart())
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await loginApi({
+        username,
+        password,
+      }).unwrap()
 
-      notify("success", "Login successful!", {
-        description: "Redirecting to dashboard...",
-        duration: 1000,
-      })
+      if (response?.data?.token) {
+        const token = response.data.token
+        dispatch(
+          loginSuccess({
+            token: token,
+            username: username,
+          })
+        )
 
-      setTimeout(() => router.push("/dashboard"), 1000)
-    } catch (error) {
+        // Log the Bearer token to console
+        console.log("Bearer Token:", `Bearer ${token}`)
+
+        notify("success", "Login successful!", {
+          description: "Redirecting to dashboard...",
+          duration: 1000,
+        })
+
+        setTimeout(() => router.push("/businesses"), 1000)
+      } else {
+        throw new Error("No token received in response")
+      }
+    } catch (error: any) {
+      const errorMessage = error.data?.message || "Login failed. Please try again."
+      dispatch(loginFailure(errorMessage))
+      setError(errorMessage)
+
       notify("error", "Login failed", {
-        description: "Invalid credentials. Please try again.",
+        description: errorMessage,
       })
     } finally {
       setLoading(false)
@@ -50,17 +78,6 @@ const SignIn: React.FC = () => {
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value)
   }
-
-  useEffect(() => {
-    if (showSuccessNotification || showErrorNotification) {
-      const timer = setTimeout(() => {
-        setShowSuccessNotification(false)
-        setShowErrorNotification(false)
-      }, 5000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [showSuccessNotification, showErrorNotification])
 
   // Disable the button if loading or if either field is empty
   const isButtonDisabled = loading || username.trim() === "" || password.trim() === ""
@@ -123,9 +140,10 @@ const SignIn: React.FC = () => {
                       <path
                         className="opacity-75"
                         fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
+                    Processing...
                   </div>
                 ) : (
                   "Continue"
