@@ -1,11 +1,11 @@
 // src/components/CustomerInfo/CustomerInfo.tsx
 import React from "react"
-import { Customer, Account } from "lib/redux/customerApi"
+import { Account, Customer } from "lib/redux/customerApi"
 
 interface CustomerInfoProps {
-  customer: Customer
   accounts?: Account[]
   business?: any
+  customer: Customer
 }
 
 const CustomerInfo: React.FC<CustomerInfoProps> = ({ customer, accounts = [], business = null }) => {

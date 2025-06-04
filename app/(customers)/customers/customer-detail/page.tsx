@@ -7,8 +7,8 @@ import CustomerInfo from "components/CustomerInfo/CustomerInfo"
 import DashboardNav from "components/Navbar/DashboardNav"
 import {
   type Account,
-  type Customer as CustomerType,
   type CustomerResponseItem,
+  type Customer as CustomerType,
   useGetCustomerDetailsQuery,
 } from "lib/redux/customerApi"
 import { ButtonModule } from "components/ui/Button/Button"

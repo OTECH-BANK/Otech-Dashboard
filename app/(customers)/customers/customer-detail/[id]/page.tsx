@@ -6,8 +6,8 @@ import { useParams, useRouter } from "next/navigation"
 import {
   type Account,
   type Business,
-  type Customer as CustomerType,
   type CustomerResponseItem,
+  type Customer as CustomerType,
   useGetCustomerDetailsQuery,
 } from "lib/redux/customerApi"
 

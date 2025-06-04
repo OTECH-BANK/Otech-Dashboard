@@ -4,8 +4,8 @@ import React from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   type Account,
-  type Customer as CustomerType,
   type CustomerResponseItem,
+  type Customer as CustomerType,
   useGetCustomerDetailsQuery,
 } from "lib/redux/customerApi"
 import ActivateCustomerModal from "components/ui/Modal/activate-customer-modal"
