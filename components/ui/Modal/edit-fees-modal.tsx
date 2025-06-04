@@ -38,7 +38,7 @@ const EditDebitFeeModal: React.FC<EditDebitFeeModalProps> = ({ isOpen, onRequest
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (bankFee < 0) newErrors.bankFee = "Bank fee must be positive"
+    if (bankFee < 0) newErrors.bankFee = "Bank fee must be positive please"
     if (switchFee < 0) newErrors.switchFee = "Switch fee must be positive"
 
     setErrors(newErrors)
