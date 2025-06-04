@@ -5,7 +5,7 @@ import { ButtonModule } from "../Button/Button"
 
 import { FormInputModule } from "../Input/Input"
 import { FormSelectModule } from "../Input/FormSelectModule"
-import { useAddEmployeeMutation, useGetRolesQuery, useGetBranchesQuery } from "lib/redux/employeeApi"
+import { useAddEmployeeMutation, useGetBranchesQuery, useGetRolesQuery } from "lib/redux/employeeApi"
 import { notify } from "../Notification/Notification"
 import { PasswordInputModule } from "../Input/PasswordInput"
 

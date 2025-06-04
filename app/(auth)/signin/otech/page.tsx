@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { useLoginMutation } from "lib/redux/api"
-import { loginStart, loginSuccess, loginFailure } from "lib/redux/features/auth/authSlice"
+import { loginFailure, loginStart, loginSuccess } from "lib/redux/features/auth/authSlice"
 import { RootState } from "lib/redux/store"
 
 // Importing modular components
@@ -54,7 +54,7 @@ const SignIn: React.FC = () => {
           duration: 1000,
         })
 
-        setTimeout(() => router.push("/businesses"), 1000)
+        setTimeout(() => router.push("/dashboard"), 1000)
       } else {
         throw new Error("No token received in response")
       }

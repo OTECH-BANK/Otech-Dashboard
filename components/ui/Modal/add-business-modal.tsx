@@ -11,7 +11,7 @@ import {
   useGetIdentityTypesQuery,
   useGetProductTypesQuery,
 } from "lib/redux/api"
-import { useGetStatesQuery, useGetLGAsByStateQuery } from "lib/redux/api"
+import { useGetLGAsByStateQuery, useGetStatesQuery } from "lib/redux/api"
 import { FormSelectModule } from "../Input/FormSelectModule"
 import { useCreateBusinessMutation } from "lib/redux/api"
 import { notify } from "../Notification/Notification"

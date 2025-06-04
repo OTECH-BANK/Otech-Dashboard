@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation"
 import CustomerInfo from "components/CustomerInfo/CustomerInfo"
 import DashboardNav from "components/Navbar/DashboardNav"
 import {
-  useGetCustomerDetailsQuery,
-  type CustomerResponseItem,
   type Account,
   type Customer as CustomerType,
+  type CustomerResponseItem,
+  useGetCustomerDetailsQuery,
 } from "lib/redux/customerApi"
 import { ButtonModule } from "components/ui/Button/Button"
 import ActivateCustomerModal from "components/ui/Modal/activate-customer-modal"

@@ -4,11 +4,11 @@
 import React, { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
-  useGetCustomerDetailsQuery,
-  type CustomerResponseItem,
   type Account,
-  type Customer as CustomerType,
   type Business,
+  type Customer as CustomerType,
+  type CustomerResponseItem,
+  useGetCustomerDetailsQuery,
 } from "lib/redux/customerApi"
 
 import CustomerInfo from "components/CustomerInfo/CustomerInfo"

@@ -6,7 +6,7 @@ import { FormInputModule } from "../Input/Input"
 import { FormSelectModule } from "../Input/FormSelectModule"
 import { useAddCustomerMutation, useGetPendingApprovalCustomersQuery } from "lib/redux/customerApi"
 import { notify } from "../Notification/Notification"
-import { useGetStatesQuery, useGetLGAsByStateQuery } from "lib/redux/api"
+import { useGetLGAsByStateQuery, useGetStatesQuery } from "lib/redux/api"
 import { useGetCustomerTypesQuery, useGetIdentityTypesQuery, useGetProductTypesQuery } from "lib/redux/api"
 
 interface AddCustomerModalProps {
