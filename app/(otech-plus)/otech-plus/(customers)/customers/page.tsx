@@ -28,7 +28,7 @@ export default function AllTransactions() {
           <DashboardNav />
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4">
-              <p className="text-2xl font-medium">All Accounts</p>
+              <p className="text-2xl font-medium">All Account</p>
               {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ExchangeRateMarquee />
             </div>
@@ -48,7 +48,7 @@ export default function AllTransactions() {
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Accounts count:</p>
-                              <p className="text-secondary font-medium">7,679</p>
+                              <p className="text-secondary font-medium">7,6759</p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
