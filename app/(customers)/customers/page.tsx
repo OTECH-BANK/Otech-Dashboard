@@ -16,16 +16,51 @@ import { ButtonModule } from "components/ui/Button/Button"
 import AddBusiness from "public/add-business"
 import { useState } from "react"
 import AddCustomerModal from "components/ui/Modal/add-customer-modal"
-
-interface PaymentAccount {
-  id: number
-  src: any
-  name: string
-  balance: string
-}
+import {
+  useGetCustomersQuery,
+  useGetPendingApprovalCustomersQuery,
+  useAddCustomerMutation,
+} from "lib/redux/customerApi"
 
 export default function AllTransactions() {
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
+  // Fetch all customers
+  const {
+    data: customersData,
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+  } = useGetCustomersQuery({ pageNumber, pageSize })
+
+  // Fetch pending approval customers (inactive)
+  const {
+    data: pendingCustomersData,
+    isLoading: isPendingLoading,
+    isError: isPendingError,
+  } = useGetPendingApprovalCustomersQuery({ pageNumber: 1, pageSize: 100 }) // Get all inactive for stats
+
+  // Add customer mutation
+  const [addCustomer] = useAddCustomerMutation()
+
+  // Calculate customer stats
+  const totalCustomers = customersData?.totalRecords || 0
+  const activeCustomers = customersData?.data?.filter((c) => c.customer.customerStatus).length || 0
+  const frozenCustomers = customersData?.data?.filter((c) => !c.customer.customerStatus).length || 0
+  const inactiveCustomers = pendingCustomersData?.totalRecords || 0
+
+  // Format numbers with commas
+  const formatNumber = (num: number) => {
+    return num.toLocaleString()
+  }
+
+  const handleAddCustomerSuccess = async () => {
+    setIsAddCustomerModalOpen(false)
+    // You might want to refresh the customer list here
+    // Could implement cache invalidation or manual refetch
+  }
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
@@ -34,7 +69,6 @@ export default function AllTransactions() {
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-3 py-4 md:px-16">
               <p className="text-2xl font-medium">All Customers</p>
-              {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ButtonModule
                 variant="primary"
                 size="md"
@@ -61,18 +95,20 @@ export default function AllTransactions() {
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Accounts count:</p>
-                              <p className="text-secondary font-medium">7,679</p>
+                              <p className="text-secondary font-medium">
+                                {isCustomersLoading ? "Loading..." : formatNumber(totalCustomers)}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
+                              <p className="text-grey-200">Active Accounts:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>40,453,456.26
+                                {isCustomersLoading ? "Loading..." : formatNumber(activeCustomers)}
                               </p>
                             </div>
                           </div>
                         </div>
                         {/* Overview ends */}
-                        {/* Incoming starts */}
+                        {/* Active Accounts starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <IncomingIcon />
@@ -80,19 +116,23 @@ export default function AllTransactions() {
                           </div>
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">407</p>
+                              <p className="text-grey-200">Total:</p>
+                              <p className="text-secondary font-medium">
+                                {isCustomersLoading ? "Loading..." : formatNumber(activeCustomers)}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
+                              <p className="text-grey-200">Percentage:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>15,097,280.54
+                                {isCustomersLoading
+                                  ? "..."
+                                  : `${Math.round((activeCustomers / totalCustomers) * 100)}%`}
                               </p>
                             </div>
                           </div>
                         </div>
-                        {/* Incoming ends */}
-                        {/* Outgoing starts */}
+                        {/* Active Accounts ends */}
+                        {/* Frozen Accounts starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <OutgoingIcon />
@@ -100,19 +140,23 @@ export default function AllTransactions() {
                           </div>
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">110</p>
+                              <p className="text-grey-200">Total:</p>
+                              <p className="text-secondary font-medium">
+                                {isCustomersLoading ? "Loading..." : formatNumber(frozenCustomers)}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
+                              <p className="text-grey-200">Percentage:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>8,453,456.96
+                                {isCustomersLoading
+                                  ? "..."
+                                  : `${Math.round((frozenCustomers / totalCustomers) * 100)}%`}
                               </p>
                             </div>
                           </div>
                         </div>
-                        {/* Outgoing ends */}
-                        {/* Unresolved starts */}
+                        {/* Frozen Accounts ends */}
+                        {/* Inactive Accounts starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <UnresolvedTransactions />
@@ -122,19 +166,21 @@ export default function AllTransactions() {
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total:</p>
                               <div className="flex gap-1">
-                                <p className="text-secondary font-medium">110</p>
+                                <p className="text-secondary font-medium">
+                                  {isPendingLoading ? "Loading..." : formatNumber(inactiveCustomers)}
+                                </p>
                                 <ArrowIcon />
                               </div>
                             </div>
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
+                              <p className="text-grey-200">Pending Approval:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>53,456.00
+                                {isPendingLoading ? "..." : inactiveCustomers}
                               </p>
                             </div>
                           </div>
                         </div>
-                        {/* Unresolved ends */}
+                        {/* Inactive Accounts ends */}
                       </div>
                     </div>
                   </div>
@@ -148,10 +194,7 @@ export default function AllTransactions() {
       <AddCustomerModal
         isOpen={isAddCustomerModalOpen}
         onRequestClose={() => setIsAddCustomerModalOpen(false)}
-        onSuccess={() => {
-          // You might want to refresh the customer list here
-          console.log("Customer added successfully")
-        }}
+        onSuccess={handleAddCustomerSuccess}
       />
     </section>
   )

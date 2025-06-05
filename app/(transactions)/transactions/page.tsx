@@ -12,6 +12,9 @@ import UnresolvedTransactions from "public/unresolved-transactions"
 import ArrowIcon from "public/arrow-icon"
 import AllTransactionTable from "components/Tables/AllTransactionstable"
 
+import { useEffect, useState } from "react"
+import { useGetTransactionsQuery } from "lib/redux/transactionApi"
+
 interface PaymentAccount {
   id: number
   src: any
@@ -20,6 +23,28 @@ interface PaymentAccount {
 }
 
 export default function AllTransactions() {
+  const [pageNumber, setPageNumber] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const { data: transactionsData, isLoading, isError } = useGetTransactionsQuery({ pageNumber, pageSize })
+
+  // Calculate transaction stats
+  const totalTransactions = transactionsData?.data?.length || 0
+  const totalVolume = transactionsData?.data?.reduce((sum, transaction) => sum + transaction.transactionAmount, 0) || 0
+  const incomingTransactions = transactionsData?.data?.filter((t) => t.transactionType === "INCOMING").length || 0
+  const incomingVolume =
+    transactionsData?.data
+      ?.filter((t) => t.transactionType === "INCOMING")
+      .reduce((sum, t) => sum + t.transactionAmount, 0) || 0
+  const outgoingTransactions = transactionsData?.data?.filter((t) => t.transactionType === "OUTGOING").length || 0
+  const outgoingVolume =
+    transactionsData?.data
+      ?.filter((t) => t.transactionType === "OUTGOING")
+      .reduce((sum, t) => sum + t.transactionAmount, 0) || 0
+  const unresolvedTransactions = transactionsData?.data?.filter((t) => t.transactionStatus === 0).length || 0
+  const unresolvedVolume =
+    transactionsData?.data?.filter((t) => t.transactionStatus === 0).reduce((sum, t) => sum + t.transactionAmount, 0) ||
+    0
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
@@ -28,7 +53,6 @@ export default function AllTransactions() {
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-3 py-4 md:px-16">
               <p className="text-2xl font-medium">All Transactions</p>
-              {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ExchangeRateMarquee />
             </div>
 
@@ -47,12 +71,24 @@ export default function AllTransactions() {
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">7,679</p>
+                              <p className="text-secondary font-medium">
+                                {isLoading ? "Loading..." : totalTransactions.toLocaleString()}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>40,453,456.26
+                                {isLoading ? (
+                                  "Loading..."
+                                ) : (
+                                  <>
+                                    <span className="text-grey-300 font-normal">NGN </span>
+                                    {totalVolume.toLocaleString("en-NG", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -67,12 +103,24 @@ export default function AllTransactions() {
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">407</p>
+                              <p className="text-secondary font-medium">
+                                {isLoading ? "Loading..." : incomingTransactions.toLocaleString()}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>15,097,280.54
+                                {isLoading ? (
+                                  "Loading..."
+                                ) : (
+                                  <>
+                                    <span className="text-grey-300 font-normal">NGN </span>
+                                    {incomingVolume.toLocaleString("en-NG", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -87,12 +135,24 @@ export default function AllTransactions() {
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">110</p>
+                              <p className="text-secondary font-medium">
+                                {isLoading ? "Loading..." : outgoingTransactions.toLocaleString()}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>8,453,456.96
+                                {isLoading ? (
+                                  "Loading..."
+                                ) : (
+                                  <>
+                                    <span className="text-grey-300 font-normal">NGN </span>
+                                    {outgoingVolume.toLocaleString("en-NG", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -108,14 +168,26 @@ export default function AllTransactions() {
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total:</p>
                               <div className="flex gap-1">
-                                <p className="text-secondary font-medium">110</p>
+                                <p className="text-secondary font-medium">
+                                  {isLoading ? "Loading..." : unresolvedTransactions.toLocaleString()}
+                                </p>
                                 <ArrowIcon />
                               </div>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>53,456.00
+                                {isLoading ? (
+                                  "Loading..."
+                                ) : (
+                                  <>
+                                    <span className="text-grey-300 font-normal">NGN </span>
+                                    {unresolvedVolume.toLocaleString("en-NG", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>

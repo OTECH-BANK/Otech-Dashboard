@@ -296,7 +296,7 @@ const RecentTransactionTable = () => {
     return (
       <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-3 md:p-5">
         <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
-          <div className="text-center">
+          <div className="flex w-full flex-col items-center justify-center text-center">
             <EmptyState />
             <p className="text-xl font-bold text-[#D82E2E]">Failed to load transactions.</p>
             <p>Please refresh or try again later.</p>
