@@ -1,16 +1,14 @@
 "use client"
-
 import React, { useEffect, useRef, useState } from "react"
 import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
 import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos, MdOutlineCheckBoxOutlineBlank } from "react-icons/md"
-import { ButtonModule } from "components/ui/Button/Button"
+import { useRouter } from "next/navigation"
 import ExportIcon from "public/export-icon"
+import EmptyState from "public/empty-state"
+import { ButtonModule } from "components/ui/Button/Button"
 import { SearchModule } from "components/ui/Search/search-module"
 
-import EmptyState from "public/empty-state"
-
 import { Customer, useGetPendingApprovalCustomersQuery } from "lib/redux/customerApi"
-import { useRouter } from "next/navigation"
 
 type SortOrder = "asc" | "desc" | null
 
@@ -37,6 +35,17 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails
     }
   }, [])
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault()
+    // 1) Store the entire “customer” object in localStorage (so the detail page can read it).
+    localStorage.setItem("selectedCustomer", JSON.stringify(customer))
+    onViewDetails(customer)
+    setIsOpen(false)
+
+    // 2) Navigate to `/customers/customer-detail/{customerID}`
+    router.push(`/customers/customer-detail/${customer.customerID}`)
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
@@ -49,22 +58,17 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails
         <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             <a
-              href={`/customers/customer-detail`}
+              // We don’t need a real `href` because we call push() programmatically
+              href={`/customers/customer-detail/${customer.customerID}`}
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={(e) => {
-                e.preventDefault()
-                localStorage.setItem("selectedCustomer", JSON.stringify(customer))
-                onViewDetails(customer)
-                setIsOpen(false)
-                router.push("/customers/customer-detail")
-              }}
+              onClick={handleViewDetails}
             >
               View Details
             </a>
             <button
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => {
-                console.log("Edit customer:", customer.customerID)
+                console.log("Freeze customer:", customer.customerID)
                 setIsOpen(false)
               }}
             >
@@ -137,15 +141,14 @@ const LoadingSkeleton = () => {
   )
 }
 
-const PendingApproval = () => {
+const PendingApproval: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [error, setError] = useState<string | null>(null)
   const pageSize = 10
 
-  // Fetch customers using the API hook
+  // Fetch customers using RTK Query
   const {
     data: customersResponse,
     isLoading,
@@ -156,10 +159,11 @@ const PendingApproval = () => {
   })
 
   const customerItems = customersResponse?.data || []
+  // We only extract the `.customer` object here for listing
   const customers = customerItems.map((item) => item.customer)
   const totalRecords = customersResponse?.totalRecords || 0
 
-  // State to handle modal for customer details
+  // State & Handlers for modals
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [isCustomerDetailModalOpen, setIsCustomerDetailModalOpen] = useState(false)
 
@@ -218,7 +222,7 @@ const PendingApproval = () => {
             size="md"
             icon={<ExportIcon />}
             iconPosition="end"
-            onClick={() => alert("Button clicked!")}
+            onClick={() => alert("Export clicked!")}
           >
             <p className="max-sm:hidden">Export</p>
           </ButtonModule>
@@ -348,8 +352,8 @@ const PendingApproval = () => {
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
                       <ActionDropdown
                         customer={customer}
-                        onViewDetails={(customer) => {
-                          setSelectedCustomer(customer)
+                        onViewDetails={(cust) => {
+                          setSelectedCustomer(cust)
                           setIsCustomerDetailModalOpen(true)
                         }}
                       />
