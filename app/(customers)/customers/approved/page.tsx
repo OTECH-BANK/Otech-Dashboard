@@ -1,24 +1,20 @@
 "use client"
 import DashboardNav from "components/Navbar/DashboardNav"
-import TotalAssets from "public/total-assets"
-import TransactionIcon from "public/transaction-icon"
 import InsightIcon from "public/insight-icon"
-import ExchangeRateMarquee from "components/ui/ExchangeRate/exchange-rate"
 import IncomingIcon from "public/incoming-icon"
 import OutgoingIcon from "public/outgoing-icon"
-import WarningIcon from "public/warning-icon"
 import UnresolvedTransactions from "public/unresolved-transactions"
 import ArrowIcon from "public/arrow-icon"
 import AllAccountsTable from "components/Tables/AllAccountsTable"
 import { ButtonModule } from "components/ui/Button/Button"
 import AddBusiness from "public/add-business"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import AddCustomerModal from "components/ui/Modal/add-customer-modal"
 import {
+  CustomerResponseItem,
+  useAddCustomerMutation,
   useGetCustomersQuery,
   useGetPendingApprovalCustomersQuery,
-  useAddCustomerMutation,
-  CustomerResponseItem,
 } from "lib/redux/customerApi"
 import Link from "next/link"
 

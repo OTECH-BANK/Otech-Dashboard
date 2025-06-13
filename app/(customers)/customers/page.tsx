@@ -17,9 +17,9 @@ import AddBusiness from "public/add-business"
 import { useState } from "react"
 import AddCustomerModal from "components/ui/Modal/add-customer-modal"
 import {
+  useAddCustomerMutation,
   useGetCustomersQuery,
   useGetPendingApprovalCustomersQuery,
-  useAddCustomerMutation,
 } from "lib/redux/customerApi"
 
 export default function AllTransactions() {
