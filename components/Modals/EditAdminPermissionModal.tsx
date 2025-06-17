@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { IoClose } from "react-icons/io5"
 import { useMakeAdminMutation } from "lib/redux/otechplusApi"
 import { ButtonModule } from "components/ui/Button/Button"
