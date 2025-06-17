@@ -48,18 +48,23 @@ export function PlusLinks({ isCollapsed }: LinksProps) {
   const pathname = usePathname()
   const [permissions, setPermissions] = useState<string[]>([])
   const [links, setLinks] = useState<NavLink[]>([])
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+
     // Get auth data from localStorage
     const getAuthData = () => {
-      const authData = localStorage.getItem("authData")
-      if (authData) {
-        try {
-          const parsedAuth = JSON.parse(authData) as any
-          return parsedAuth.user?.permissions || []
-        } catch (e) {
-          console.error("Error parsing auth data", e)
-          return []
+      if (typeof window !== "undefined") {
+        const authData = localStorage.getItem("authData")
+        if (authData) {
+          try {
+            const parsedAuth = JSON.parse(authData) as any
+            return parsedAuth.user?.permissions || []
+          } catch (e) {
+            console.error("Error parsing auth data", e)
+            return []
+          }
         }
       }
       return []
@@ -92,7 +97,10 @@ export function PlusLinks({ isCollapsed }: LinksProps) {
   }, [permissions])
 
   // If no permissions loaded yet, return null or loading state
-  if (permissions.length === 0 && localStorage.getItem("authData") === null) {
+  if (
+    !isClient ||
+    (permissions.length === 0 && typeof window !== "undefined" && localStorage.getItem("authData") === null)
+  ) {
     return null
   }
 
