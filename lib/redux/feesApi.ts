@@ -57,6 +57,62 @@ export interface CreateDebitFeeResponse {
   data?: DebitFee
 }
 
+export interface IdentityType {
+  identityTypeID: number
+  identityTypeName: string
+  identityTypeObject: string
+}
+
+export interface IdentityTypesResponse {
+  data: IdentityType[]
+  totalRecords: number
+  currentPage: number
+  pageSize: number
+  statusCode: string | number | null
+  message: string
+  succeeded: boolean
+}
+
+export interface ProductType {
+  productTypeID: number
+  productTypeName: string
+  productTypeCode: string
+  accountType: number
+  createBy: string
+  createdate: string
+  modifyBy: string
+  modifydate: string
+  isDeleted: boolean
+}
+
+export interface ProductTypesResponse {
+  data: ProductType[]
+  totalRecords: number
+  currentPage: number
+  pageSize: number
+  statusCode: string | number | null
+  message: string
+  succeeded: boolean
+}
+
+export interface Channel {
+  disabled: boolean
+  group: string | null
+  selected: boolean
+  text: string
+  value: string
+}
+
+export interface ChannelListResponse {
+  data: Channel[]
+  totalRecords: number
+  currentPage: number
+  pageSize: number
+  statusCode: string | number | null
+  message: string
+  succeeded: boolean
+}
+
 export const feesApi = createApi({
   reducerPath: "feesApi",
   baseQuery: fetchBaseQuery({
@@ -101,8 +157,33 @@ export const feesApi = createApi({
         method: "GET",
       }),
     }),
+    getIdentityTypes: builder.query<IdentityTypesResponse, void>({
+      query: () => ({
+        url: "api/Setup/IdentityTypes",
+        method: "GET",
+      }),
+    }),
+    getProductTypes: builder.query<ProductTypesResponse, void>({
+      query: () => ({
+        url: "api/Setup/ProductType",
+        method: "GET",
+      }),
+    }),
+    getChannelList: builder.query<ChannelListResponse, void>({
+      query: () => ({
+        url: "api/Setup/ChannelList",
+        method: "GET",
+      }),
+    }),
   }),
 })
 
-export const { useGetDebitFeesQuery, useCreateDebitFeeMutation, useUpdateDebitFeeMutation, useLazyCalculateFeeQuery } =
-  feesApi
+export const {
+  useGetDebitFeesQuery,
+  useCreateDebitFeeMutation,
+  useUpdateDebitFeeMutation,
+  useLazyCalculateFeeQuery,
+  useGetIdentityTypesQuery,
+  useGetProductTypesQuery,
+  useGetChannelListQuery,
+} = feesApi

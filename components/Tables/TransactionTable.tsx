@@ -379,7 +379,7 @@ const RecentTransactionTable = () => {
                     onClick={() => toggleSort("type")}
                   >
                     <div className="flex items-center gap-2">
-                      Type <RxCaretSort />
+                      Transaction Type <RxCaretSort />
                     </div>
                   </th>
                   <th

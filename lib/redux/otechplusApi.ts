@@ -433,7 +433,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     if (typeof window !== "undefined") {
       const authData = localStorage.getItem("authData")
       if (!authData) {
-        window.location.href = "/login"
+        window.location.href = "/signin/otech-plus"
         return result
       }
 
@@ -441,7 +441,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       const refreshToken = parsedAuthData.tokens?.refreshToken
 
       if (!refreshToken) {
-        window.location.href = "/login"
+        window.location.href = "/signin/otech-plus"
         return result
       }
 

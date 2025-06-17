@@ -230,25 +230,6 @@ export default function EmployeePage() {
             <div className="flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3 md:my-8">
               <div className="flex h-screen w-full max-sm:flex-col">
                 <div className={`w-full flex-1 ${isFilterOpen ? "mr-0" : ""}`}>
-                  <div className="mb-5 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm max-sm:text-xs">
-                      <p className="text-grey-300">Employees Count:</p>
-                      {isLoading ? (
-                        <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
-                      ) : (
-                        <p>{employeesData?.totalRecords || 0}</p>
-                      )}
-                    </div>
-                    <ButtonModule
-                      variant="secondary"
-                      size="md"
-                      icon={<Filtericon />}
-                      iconPosition="end"
-                      onClick={toggleFilter}
-                    >
-                      Filter
-                    </ButtonModule>
-                  </div>
                   <div
                     className={`grid w-full gap-4 max-sm:mb-4 max-sm:grid-cols-1 max-sm:px-0 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 ${
                       isFilterOpen ? "lg-grid-cols-2 2xl:grid-cols-3" : ""
@@ -283,7 +264,7 @@ export default function EmployeePage() {
                                 >
                                   <RxDotsVertical />
                                 </button>
-                                {openDropdownId === employee.userID && (
+                                {/* {openDropdownId === employee.userID && (
                                   <div className="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
                                     <div className="py-1">
                                       <button
@@ -300,7 +281,7 @@ export default function EmployeePage() {
                                       </button>
                                     </div>
                                   </div>
-                                )}
+                                )} */}
                               </div>
                             </div>
 

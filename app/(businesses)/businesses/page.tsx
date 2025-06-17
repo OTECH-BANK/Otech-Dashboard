@@ -10,38 +10,88 @@ import AddBusiness from "public/add-business"
 import { useState } from "react"
 import AddBusinessModal from "components/ui/Modal/add-business-modal"
 import AllBusinessTable from "components/Tables/AllBusinessTable"
+import { useGetBusinessesQuery } from "lib/redux/api"
 
-interface PaymentAccount {
-  id: number
-  src: any
-  name: string
-  balance: string
+interface BusinessStats {
+  totalBusinesses: number
+  recentlyAdded: number
+  activeBusinesses: number
+  inactiveBusinesses: number
+  totalVolume: number
+  recentlyAddedVolume: number
+  activeVolume: number
+  inactiveVolume: number
 }
 
 export default function AllTransactions() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAddBusinessModalOpen, setIsAddBusinessModalOpen] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0) // Add refresh key state
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  const handleAddBusiness = async (businessData: { name: string; email: string; phone: string; address: string }) => {
-    setIsSubmitting(true)
-    try {
-      // Here you would typically call your API to add the business
-      console.log("Adding business:", businessData)
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      // Close modal after successful submission
-      setIsAddBusinessModalOpen(false)
-    } catch (error) {
-      console.error("Error adding business:", error)
-    } finally {
-      setIsSubmitting(false)
+  // Fetch businesses data
+  const {
+    data: businessesData,
+    isLoading,
+    isError,
+  } = useGetBusinessesQuery({
+    pageNumber: 1,
+    pageSize: 1000, // Fetch all businesses to calculate stats
+  })
+
+  // Calculate business stats
+  const calculateStats = (): BusinessStats => {
+    if (!businessesData) {
+      return {
+        totalBusinesses: 0,
+        recentlyAdded: 0,
+        activeBusinesses: 0,
+        inactiveBusinesses: 0,
+        totalVolume: 0,
+        recentlyAddedVolume: 0,
+        activeVolume: 0,
+        inactiveVolume: 0,
+      }
+    }
+
+    const now = new Date()
+    const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7))
+
+    const recentlyAdded = businessesData.data.filter((business) => {
+      const createdDate = new Date(business.dateCreated)
+      return createdDate >= sevenDaysAgo
+    }).length
+
+    // All businesses are active by default unless explicitly disabled/deleted
+    const activeBusinesses = businessesData.data.filter(
+      (business) => business.status !== "Disabled" && business.status !== "Deleted"
+    ).length
+
+    const inactiveBusinesses = businessesData.data.filter(
+      (business) => business.status === "Disabled" || business.status === "Deleted"
+    ).length
+
+    // Placeholder volume calculations - adjust based on your actual business model
+    const totalVolume = businessesData.data.length * 100000
+    const recentlyAddedVolume = recentlyAdded * 50000
+    const activeVolume = activeBusinesses * 120000
+    const inactiveVolume = inactiveBusinesses * 20000
+
+    return {
+      totalBusinesses: businessesData.totalRecords,
+      recentlyAdded,
+      activeBusinesses,
+      inactiveBusinesses,
+      totalVolume,
+      recentlyAddedVolume,
+      activeVolume,
+      inactiveVolume,
     }
   }
 
+  const stats = calculateStats()
+
   const handleBusinessAdded = () => {
-    setRefreshKey((prev) => prev + 1) // Increment key to force table refresh
-    setIsAddBusinessModalOpen(false) // Close modal
+    setRefreshKey((prev) => prev + 1)
+    setIsAddBusinessModalOpen(false)
   }
 
   return (
@@ -51,7 +101,7 @@ export default function AllTransactions() {
           <DashboardNav />
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
-              <p className="font-medium  md:text-2xl">Businesses Page</p>
+              <p className="font-medium md:text-2xl">Businesses Page</p>
               <ButtonModule
                 variant="primary"
                 size="md"
@@ -77,61 +127,85 @@ export default function AllTransactions() {
                           </div>
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Cards count:</p>
-                              <p className="text-secondary font-medium">7,679</p>
+                              <p className="text-grey-200">Business count:</p>
+                              <p className="text-secondary font-medium">
+                                {isLoading ? "Loading..." : stats.totalBusinesses}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>40,453,456.26
+                                <span className="text-grey-300 font-normal">NGN </span>
+                                {isLoading
+                                  ? "Loading..."
+                                  : stats.totalVolume.toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
                               </p>
                             </div>
                           </div>
                         </div>
                         {/* Overview ends */}
-                        {/* Incoming starts */}
+                        {/* Recently Added starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F8FA]">
                               <RecentlyAdded />
                             </div>
-                            Recently Added
+                            Recently Added (7d)
                           </div>
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total count:</p>
-                              <p className="text-secondary font-medium">407</p>
+                              <p className="text-secondary font-medium">
+                                {isLoading ? "Loading..." : stats.recentlyAdded}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>15,097,280.54
+                                <span className="text-grey-300 font-normal">NGN </span>
+                                {isLoading
+                                  ? "Loading..."
+                                  : stats.recentlyAddedVolume.toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
                               </p>
                             </div>
                           </div>
                         </div>
-                        {/* Incoming ends */}
-                        {/* Outgoing starts */}
+                        {/* Recently Added ends */}
+                        {/* Active Businesses starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <TotalBusiness />
-                            Total Businesses
+                            Active Businesses
                           </div>
                           <div className="flex flex-col items-end justify-between gap-3 pt-4">
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total count:</p>
-                              <p className="text-secondary font-medium">110</p>
+                              <p className="text-secondary font-medium">
+                                {isLoading ? "Loading..." : stats.activeBusinesses}
+                              </p>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>8,453,456.96
+                                <span className="text-grey-300 font-normal">NGN </span>
+                                {isLoading
+                                  ? "Loading..."
+                                  : stats.activeVolume.toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
                               </p>
                             </div>
                           </div>
                         </div>
-                        {/* Outgoing ends */}
-                        {/* Unresolved starts */}
+                        {/* Active Businesses ends */}
+                        {/* Inactive Businesses starts */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <DisabledBusiness />
@@ -141,19 +215,27 @@ export default function AllTransactions() {
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total:</p>
                               <div className="flex gap-1">
-                                <p className="text-secondary font-medium">110</p>
+                                <p className="text-secondary font-medium">
+                                  {isLoading ? "Loading..." : stats.inactiveBusinesses}
+                                </p>
                                 <ArrowIcon />
                               </div>
                             </div>
                             <div className="flex w-full justify-between">
                               <p className="text-grey-200">Total Volume:</p>
                               <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>53,456.00
+                                <span className="text-grey-300 font-normal">NGN </span>
+                                {isLoading
+                                  ? "Loading..."
+                                  : stats.inactiveVolume.toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
                               </p>
                             </div>
                           </div>
                         </div>
-                        {/* Unresolved ends */}
+                        {/* Inactive Businesses ends */}
                       </div>
                     </div>
                   </div>
@@ -167,7 +249,7 @@ export default function AllTransactions() {
       <AddBusinessModal
         isOpen={isAddBusinessModalOpen}
         onRequestClose={() => setIsAddBusinessModalOpen(false)}
-        onSuccess={handleBusinessAdded} // Callback when form submits successfully
+        onSuccess={handleBusinessAdded}
       />
     </section>
   )

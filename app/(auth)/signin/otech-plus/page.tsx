@@ -10,6 +10,7 @@ import Footer from "components/Footer/Footer"
 import { FormInputModule } from "components/ui/Input/Input"
 import { notify } from "components/ui/Notification/Notification"
 import { useLoginMutation } from "lib/redux/otechplusApi"
+import { LuArrowLeft } from "react-icons/lu"
 
 const SignIn: React.FC = () => {
   const [username, setUsername] = useState("")
@@ -152,6 +153,13 @@ const SignIn: React.FC = () => {
             </form>
           </div>
         </div>
+        <Link
+          href="/"
+          className="mt-3 flex items-center gap-2 transition-all duration-200 ease-in-out hover:text-[#f4af7e]"
+        >
+          <LuArrowLeft />
+          <p>Back</p>
+        </Link>
 
         <Footer />
       </div>

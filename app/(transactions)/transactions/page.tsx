@@ -28,17 +28,19 @@ export default function AllTransactions() {
   const { data: transactionsData, isLoading, isError } = useGetTransactionsQuery({ pageNumber, pageSize })
 
   // Calculate transaction stats
-  const totalTransactions = transactionsData?.data?.length || 0
+  const totalTransactions = transactionsData?.totalRecords || 0
   const totalVolume = transactionsData?.data?.reduce((sum, transaction) => sum + transaction.transactionAmount, 0) || 0
-  const incomingTransactions = transactionsData?.data?.filter((t) => t.transactionType === "INCOMING").length || 0
+
+  // Updated to use DR/CR instead of INCOMING/OUTGOING
+  const incomingTransactions = transactionsData?.data?.filter((t) => t.transactionType === "CR").length || 0
   const incomingVolume =
     transactionsData?.data
-      ?.filter((t) => t.transactionType === "INCOMING")
+      ?.filter((t) => t.transactionType === "CR")
       .reduce((sum, t) => sum + t.transactionAmount, 0) || 0
-  const outgoingTransactions = transactionsData?.data?.filter((t) => t.transactionType === "OUTGOING").length || 0
+  const outgoingTransactions = transactionsData?.data?.filter((t) => t.transactionType === "DR").length || 0
   const outgoingVolume =
     transactionsData?.data
-      ?.filter((t) => t.transactionType === "OUTGOING")
+      ?.filter((t) => t.transactionType === "DR")
       .reduce((sum, t) => sum + t.transactionAmount, 0) || 0
   const unresolvedTransactions = transactionsData?.data?.filter((t) => t.transactionStatus === 0).length || 0
   const unresolvedVolume =

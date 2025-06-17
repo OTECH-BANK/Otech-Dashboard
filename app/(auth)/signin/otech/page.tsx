@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { useLoginMutation } from "lib/redux/api"
 import { loginFailure, loginStart, loginSuccess } from "lib/redux/features/auth/authSlice"
 import { RootState } from "lib/redux/store"
+import { LuArrowLeft } from "react-icons/lu"
 
 // Importing modular components
 import { PasswordInputModule } from "components/ui/Input/PasswordInput"
@@ -152,6 +153,13 @@ const SignIn: React.FC = () => {
             </form>
           </div>
         </div>
+        <Link
+          href="/"
+          className="mt-3 flex items-center gap-2 transition-all duration-200 ease-in-out hover:text-[#f4af7e]"
+        >
+          <LuArrowLeft />
+          <p>Back</p>
+        </Link>
 
         <Footer />
       </div>

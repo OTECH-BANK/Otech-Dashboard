@@ -217,9 +217,9 @@ export default function EmployeeDetails() {
                 <ButtonModule variant="primary" size="md" iconPosition="end" onClick={handleActivateEmployee}>
                   Activate Employee
                 </ButtonModule>
-                <ButtonModule variant="black" size="md" iconPosition="end" onClick={handleGenerateReceipt}>
+                {/* <ButtonModule variant="black" size="md" iconPosition="end" onClick={handleGenerateReceipt}>
                   Edit Employee
-                </ButtonModule>
+                </ButtonModule> */}
               </div>
             </div>
 
