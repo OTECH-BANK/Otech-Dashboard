@@ -396,9 +396,17 @@ const baseQuery = retry(
   fetchBaseQuery({
     baseUrl: "https://otechpaygo-dev.otechcloud.com/api/",
     prepareHeaders: (headers, { getState }) => {
+      // First try to get token from Redux state
       const token = (getState() as RootState).auth.token
 
-      if (!token) {
+      if (token) {
+        const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+        headers.set("Authorization", authToken)
+        return headers
+      }
+
+      // Only try to access localStorage on client side
+      if (typeof window !== "undefined") {
         const authData = localStorage.getItem("authData")
         if (authData) {
           const parsedAuthData = JSON.parse(authData) as any
@@ -406,9 +414,6 @@ const baseQuery = retry(
             headers.set("Authorization", `Bearer ${parsedAuthData.tokens.accessToken}`)
           }
         }
-      } else {
-        const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-        headers.set("Authorization", authToken)
       }
 
       headers.set("accept", "*/*")
@@ -424,49 +429,52 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   let result = await baseQuery(args, api, extraOptions)
 
   if (result?.error?.status === 401) {
-    const authData = localStorage.getItem("authData")
-    if (!authData) {
-      window.location.href = "/login"
-      return result
-    }
+    // Only try to refresh token on client side
+    if (typeof window !== "undefined") {
+      const authData = localStorage.getItem("authData")
+      if (!authData) {
+        window.location.href = "/login"
+        return result
+      }
 
-    const parsedAuthData = JSON.parse(authData) as any
-    const refreshToken = parsedAuthData.tokens?.refreshToken
+      const parsedAuthData = JSON.parse(authData) as any
+      const refreshToken = parsedAuthData.tokens?.refreshToken
 
-    if (!refreshToken) {
-      window.location.href = "/login"
-      return result
-    }
+      if (!refreshToken) {
+        window.location.href = "/login"
+        return result
+      }
 
-    const refreshResult = await baseQuery(
-      {
-        url: "Admin/refresh-token",
-        method: "POST",
-        body: { refreshToken },
-      },
-      api,
-      extraOptions
-    )
-
-    if (refreshResult.data) {
-      const newTokens = (refreshResult.data as RefreshTokenResponse).tokens
-      parsedAuthData.tokens = newTokens
-      localStorage.setItem("authData", JSON.stringify(parsedAuthData))
-
-      result = await baseQuery(
+      const refreshResult = await baseQuery(
         {
-          ...args,
-          headers: {
-            ...args.headers,
-            Authorization: `Bearer ${newTokens.accessToken}`,
-          },
+          url: "Admin/refresh-token",
+          method: "POST",
+          body: { refreshToken },
         },
         api,
         extraOptions
       )
-    } else {
-      localStorage.removeItem("authData")
-      window.location.href = "/signin/otech-plus"
+
+      if (refreshResult.data) {
+        const newTokens = (refreshResult.data as RefreshTokenResponse).tokens
+        parsedAuthData.tokens = newTokens
+        localStorage.setItem("authData", JSON.stringify(parsedAuthData))
+
+        result = await baseQuery(
+          {
+            ...args,
+            headers: {
+              ...args.headers,
+              Authorization: `Bearer ${newTokens.accessToken}`,
+            },
+          },
+          api,
+          extraOptions
+        )
+      } else {
+        localStorage.removeItem("authData")
+        window.location.href = "/signin/otech-plus"
+      }
     }
   }
 
@@ -489,17 +497,20 @@ export const otectplusApi = createApi({
         },
       }),
       transformResponse: (response: LoginResponse) => {
-        const authData = {
-          tokens: response.tokens,
-          user: {
-            ...response.user,
-            permissions: response.permissions || [],
-          },
+        if (typeof window !== "undefined") {
+          const authData = {
+            tokens: response.tokens,
+            user: {
+              ...response.user,
+              permissions: response.permissions || [],
+            },
+          }
+          localStorage.setItem("authData", JSON.stringify(authData))
         }
-        localStorage.setItem("authData", JSON.stringify(authData))
         return response
       },
     }),
+
     refreshToken: builder.mutation<RefreshTokenResponse, RefreshTokenRequest>({
       query: ({ refreshToken }) => ({
         url: "Admin/refresh-token",
@@ -511,11 +522,13 @@ export const otectplusApi = createApi({
         },
       }),
       transformResponse: (response: RefreshTokenResponse) => {
-        const authData = localStorage.getItem("authData")
-        if (authData) {
-          const parsedAuthData = JSON.parse(authData) as any
-          parsedAuthData.tokens = response.tokens
-          localStorage.setItem("authData", JSON.stringify(parsedAuthData))
+        if (typeof window !== "undefined") {
+          const authData = localStorage.getItem("authData")
+          if (authData) {
+            const parsedAuthData = JSON.parse(authData) as any
+            parsedAuthData.tokens = response.tokens
+            localStorage.setItem("authData", JSON.stringify(parsedAuthData))
+          }
         }
         return response
       },
