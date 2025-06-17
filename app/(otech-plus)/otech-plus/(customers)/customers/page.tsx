@@ -11,7 +11,12 @@ import WarningIcon from "public/warning-icon"
 import UnresolvedTransactions from "public/unresolved-transactions"
 import ArrowIcon from "public/arrow-icon"
 import AllTransactionTable from "components/Tables/AllTransactionstable"
-import AllAccountsTable from "components/Tables/AllAccountsTable"
+import AllCustomersTable from "components/Tables/OtechPlus/AllCustomersTable"
+
+import { useEffect } from "react"
+import { useGetCustomerReportQuery } from "lib/redux/otechplusApi"
+import { formatNumberWithCommas } from "utils/helpers"
+import OtechPlusDashboardNav from "components/Navbar/OtechPlusDashboardNav"
 
 interface PaymentAccount {
   id: number
@@ -20,16 +25,56 @@ interface PaymentAccount {
   balance: string
 }
 
+// Skeleton Loader Component
+const CardSkeleton = () => (
+  <div className="small-card rounded-md p-2 transition duration-500 md:border">
+    <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
+      <div className="h-6 w-6 animate-pulse rounded-full bg-gray-200"></div>
+      <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
+    </div>
+    <div className="flex flex-col items-end justify-between gap-3 pt-4">
+      <div className="flex w-full justify-between">
+        <div className="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+        <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+      </div>
+      <div className="flex w-full justify-between">
+        <div className="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+        <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+      </div>
+    </div>
+  </div>
+)
+
 export default function AllTransactions() {
+  const { data: customerReport, isLoading, isError, refetch } = useGetCustomerReportQuery()
+
+  useEffect(() => {
+    // Refetch data when component mounts to ensure fresh data
+    refetch()
+  }, [refetch])
+
+  // Extract data from the report or provide defaults
+  const reportData = customerReport?.data || {
+    generatedAt: new Date().toISOString(),
+    countActive: 0,
+    countInactive: 0,
+    countSuspended: 0,
+    countBanned: 0,
+    countVerified: 0,
+  }
+
+  // Calculate total accounts
+  const totalAccounts =
+    reportData.countActive + reportData.countInactive + reportData.countSuspended + reportData.countBanned
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
         <div className="flex w-full flex-col">
-          <DashboardNav />
+          <OtechPlusDashboardNav />
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4">
-              <p className="text-2xl font-medium">All Account</p>
-              {/* Replacing the previous button group with the real-time exchange rates marquee */}
+              <p className="text-2xl font-medium">All Customers</p>
               <ExchangeRateMarquee />
             </div>
 
@@ -40,93 +85,121 @@ export default function AllTransactions() {
                     <div className="w-full">
                       <div className="mb-3 flex w-full cursor-pointer gap-3">
                         {/* Overview starts */}
-                        <div className="small-card rounded-md p-2 transition duration-500 md:border">
-                          <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
-                            <InsightIcon />
-                            Overview
-                          </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Accounts count:</p>
-                              <p className="text-secondary font-medium">7,6759</p>
+                        {isLoading ? (
+                          <CardSkeleton />
+                        ) : (
+                          <div className="small-card rounded-md p-2 transition duration-500 md:border">
+                            <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
+                              <InsightIcon />
+                              Overview
                             </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>40,453,456.26
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        {/* Overview ends */}
-                        {/* Incoming starts */}
-                        <div className="small-card rounded-md p-2 transition duration-500 md:border">
-                          <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
-                            <IncomingIcon />
-                            Active Accounts
-                          </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">407</p>
-                            </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>15,097,280.54
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        {/* Incoming ends */}
-                        {/* Outgoing starts */}
-                        <div className="small-card rounded-md p-2 transition duration-500 md:border">
-                          <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
-                            <OutgoingIcon />
-                            Frozen Accounts
-                          </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">110</p>
-                            </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>8,453,456.96
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        {/* Outgoing ends */}
-                        {/* Unresolved starts */}
-                        <div className="small-card rounded-md p-2 transition duration-500 md:border">
-                          <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
-                            <UnresolvedTransactions />
-                            Inactive Accounts
-                          </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total:</p>
-                              <div className="flex gap-1">
-                                <p className="text-secondary font-medium">110</p>
-                                <ArrowIcon />
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Accounts count:</p>
+                                <p className="text-secondary font-medium">{formatNumberWithCommas(totalAccounts)}</p>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Verified Accounts:</p>
+                                <p className="text-secondary font-medium">
+                                  {formatNumberWithCommas(reportData.countVerified)}
+                                </p>
                               </div>
                             </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>53,456.00
-                              </p>
+                          </div>
+                        )}
+                        {/* Overview ends */}
+                        {/* Active Accounts starts */}
+                        {isLoading ? (
+                          <CardSkeleton />
+                        ) : (
+                          <div className="small-card rounded-md p-2 transition duration-500 md:border">
+                            <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
+                              <IncomingIcon />
+                              Active Accounts
+                            </div>
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Count:</p>
+                                <p className="text-secondary font-medium">
+                                  {formatNumberWithCommas(reportData.countActive)}
+                                </p>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Percentage:</p>
+                                <p className="text-secondary font-medium">
+                                  {totalAccounts > 0
+                                    ? `${Math.round((reportData.countActive / totalAccounts) * 100)}%`
+                                    : "0%"}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        {/* Unresolved ends */}
+                        )}
+                        {/* Active Accounts ends */}
+                        {/* Suspended Accounts starts */}
+                        {isLoading ? (
+                          <CardSkeleton />
+                        ) : (
+                          <div className="small-card rounded-md p-2 transition duration-500 md:border">
+                            <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
+                              <OutgoingIcon />
+                              Suspended Accounts
+                            </div>
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Count:</p>
+                                <p className="text-secondary font-medium">
+                                  {formatNumberWithCommas(reportData.countSuspended)}
+                                </p>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Percentage:</p>
+                                <p className="text-secondary font-medium">
+                                  {totalAccounts > 0
+                                    ? `${Math.round((reportData.countSuspended / totalAccounts) * 100)}%`
+                                    : "0%"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Suspended Accounts ends */}
+                        {/* Banned Accounts starts */}
+                        {isLoading ? (
+                          <CardSkeleton />
+                        ) : (
+                          <div className="small-card rounded-md p-2 transition duration-500 md:border">
+                            <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
+                              <UnresolvedTransactions />
+                              Banned Accounts
+                            </div>
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Count:</p>
+                                <div className="flex gap-1">
+                                  <p className="text-secondary font-medium">
+                                    {formatNumberWithCommas(reportData.countBanned)}
+                                  </p>
+                                  <ArrowIcon />
+                                </div>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Percentage:</p>
+                                <p className="text-secondary font-medium">
+                                  {totalAccounts > 0
+                                    ? `${Math.round((reportData.countBanned / totalAccounts) * 100)}%`
+                                    : "0%"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Banned Accounts ends */}
                       </div>
                     </div>
                   </div>
                 </div>
-                <AllAccountsTable />
+                <AllCustomersTable />
               </div>
             </div>
           </div>

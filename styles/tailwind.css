@@ -165,6 +165,10 @@ body {
   @apply h-auto w-full rounded-md border-[#E4E4E4] bg-[#ffffff]  px-4 py-4 max-lg:mb-0  max-sm:h-auto max-sm:px-[14px];
 }
 
+.new-card {
+  @apply h-auto w-full rounded-md border-[#E4E4E4] bg-[#ffffff]  px-3 py-2 max-lg:mb-0  max-sm:h-auto max-sm:px-[14px];
+}
+
 .search-bg {
   @apply border   hover:bg-[#FBFAFC];
 }

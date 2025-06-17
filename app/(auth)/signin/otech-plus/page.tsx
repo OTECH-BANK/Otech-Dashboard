@@ -9,6 +9,7 @@ import { ButtonModule } from "components/ui/Button/Button"
 import Footer from "components/Footer/Footer"
 import { FormInputModule } from "components/ui/Input/Input"
 import { notify } from "components/ui/Notification/Notification"
+import { useLoginMutation } from "lib/redux/otechplusApi"
 
 const SignIn: React.FC = () => {
   const [username, setUsername] = useState("")
@@ -19,25 +20,41 @@ const SignIn: React.FC = () => {
   const [showErrorNotification, setShowErrorNotification] = useState(false)
 
   const router = useRouter()
+  const [login] = useLoginMutation()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
+    setError(null)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await login({ username, password }).unwrap()
+
+      // Store tokens in localStorage or state management
+      localStorage.setItem("accessToken", response.tokens.accessToken)
+      localStorage.setItem("refreshToken", response.tokens.refreshToken)
+      localStorage.setItem("user", JSON.stringify(response.user))
 
       notify("success", "Login successful!", {
-        description: "Redirecting to dashboard...",
+        description: response.message || "Redirecting to dashboard...",
         duration: 1000,
       })
 
       setTimeout(() => router.push("/otech-plus/dashboard"), 1000)
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error)
+      let errorMessage = "Login failed. Please try again."
+
+      if (error.data?.message) {
+        errorMessage = error.data.message
+      } else if (error.status === 401) {
+        errorMessage = "Invalid username or password"
+      }
+
       notify("error", "Login failed", {
-        description: "Invalid credentials. Please try again.",
+        description: errorMessage,
       })
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -80,12 +97,13 @@ const SignIn: React.FC = () => {
             </div>
             <form onSubmit={handleSubmit}>
               <FormInputModule
-                label="Email Address"
-                type="email"
-                placeholder="otechbankltd@gmail.com"
+                label="Username"
+                type="text"
+                placeholder="Enter your username"
                 value={username}
                 onChange={handleUsernameChange}
                 className="mb-3"
+                required
               />
 
               <PasswordInputModule

@@ -7,6 +7,7 @@ import authReducer from "./features/auth/authSlice"
 import { customerTypeApi } from "./customerTypeApi"
 import { customerApi } from "./customerApi"
 import { transactionApi } from "./transactionApi"
+import { otectplusApi } from "./otechplusApi"
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     [customerTypeApi.reducerPath]: customerTypeApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
+    [otectplusApi.reducerPath]: otectplusApi.reducer,
 
     auth: authReducer,
   },
@@ -26,7 +28,8 @@ export const store = configureStore({
       .concat(feesApi.middleware)
       .concat(customerTypeApi.middleware)
       .concat(customerApi.middleware)
-      .concat(transactionApi.middleware),
+      .concat(transactionApi.middleware)
+      .concat(otectplusApi.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

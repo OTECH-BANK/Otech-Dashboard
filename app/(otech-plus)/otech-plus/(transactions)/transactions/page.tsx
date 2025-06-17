@@ -1,16 +1,16 @@
 "use client"
 import DashboardNav from "components/Navbar/DashboardNav"
-import TotalAssets from "public/total-assets"
-import TransactionIcon from "public/transaction-icon"
+
 import InsightIcon from "public/insight-icon"
 import ExchangeRateMarquee from "components/ui/ExchangeRate/exchange-rate"
-import TransactionTable from "components/Tables/TransactionTable"
 import IncomingIcon from "public/incoming-icon"
 import OutgoingIcon from "public/outgoing-icon"
-import WarningIcon from "public/warning-icon"
+
 import UnresolvedTransactions from "public/unresolved-transactions"
 import ArrowIcon from "public/arrow-icon"
-import AllTransactionTable from "components/Tables/AllTransactionstable"
+import TransactionTable from "components/Tables/OtechPlus/TransactionTable"
+import { useGetReportQuery } from "lib/redux/otechplusApi"
+import OtechPlusDashboardNav from "components/Navbar/OtechPlusDashboardNav"
 
 interface PaymentAccount {
   id: number
@@ -20,15 +20,21 @@ interface PaymentAccount {
 }
 
 export default function AllTransactions() {
+  const { data: reportData, isLoading, isError } = useGetReportQuery()
+
+  // Format number with commas
+  const formatNumber = (num: number) => {
+    return num?.toLocaleString() || "0"
+  }
+
   return (
     <section className="h-full w-full">
       <div className="flex min-h-screen w-full">
         <div className="flex w-full flex-col">
-          <DashboardNav />
+          <OtechPlusDashboardNav />
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4">
               <p className="text-2xl font-medium">All Transactions</p>
-              {/* Replacing the previous button group with the real-time exchange rates marquee */}
               <ExchangeRateMarquee />
             </div>
 
@@ -38,94 +44,146 @@ export default function AllTransactions() {
                   <div className="flex w-full">
                     <div className="w-full">
                       <div className="mb-3 flex w-full cursor-pointer gap-3">
-                        {/* Overview starts */}
+                        {/* Overview Card */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <InsightIcon />
                             Overview
                           </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">7,679</p>
+                          {isLoading ? (
+                            <div className="flex flex-col gap-3 pt-4">
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
                             </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>40,453,456.26
-                              </p>
+                          ) : isError ? (
+                            <div className="pt-4 text-red-500">Error loading data</div>
+                          ) : (
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Transaction count:</p>
+                                <p className="text-secondary font-medium">
+                                  {formatNumber(
+                                    (reportData?.data.depositReport.countAllTimeDeposit || 0) +
+                                      (reportData?.data.paymentReport.countAllTimePayment || 0) +
+                                      (reportData?.data.withdrawalReport.countAllTimeWithdraw || 0)
+                                  )}
+                                </p>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Total Volume:</p>
+                                <p className="text-secondary font-medium">
+                                  <span className="text-grey-300 font-normal">NGN </span>
+                                  {formatNumber(
+                                    (reportData?.data.depositReport.totalAllTimeDeposit || 0) +
+                                      (reportData?.data.paymentReport.totalAllTimePayment || 0) +
+                                      (reportData?.data.withdrawalReport.totalAllTimeWithdraw || 0)
+                                  )}
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
-                        {/* Overview ends */}
-                        {/* Incoming starts */}
+
+                        {/* Incoming Card */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <IncomingIcon />
                             Incoming
                           </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">407</p>
+                          {isLoading ? (
+                            <div className="flex flex-col gap-3 pt-4">
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
                             </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>15,097,280.54
-                              </p>
+                          ) : isError ? (
+                            <div className="pt-4 text-red-500">Error loading data</div>
+                          ) : (
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Transaction count:</p>
+                                <p className="text-secondary font-medium">
+                                  {formatNumber(reportData?.data.depositReport.countAllTimeDeposit || 0)}
+                                </p>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Total Volume:</p>
+                                <p className="text-secondary font-medium">
+                                  <span className="text-grey-300 font-normal">NGN </span>
+                                  {formatNumber(reportData?.data.depositReport.totalAllTimeDeposit || 0)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
-                        {/* Incoming ends */}
-                        {/* Outgoing starts */}
+
+                        {/* Outgoing Card */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <OutgoingIcon />
                             Outgoing
                           </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Transaction count:</p>
-                              <p className="text-secondary font-medium">110</p>
+                          {isLoading ? (
+                            <div className="flex flex-col gap-3 pt-4">
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
                             </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>8,453,456.96
-                              </p>
+                          ) : isError ? (
+                            <div className="pt-4 text-red-500">Error loading data</div>
+                          ) : (
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Transaction count:</p>
+                                <p className="text-secondary font-medium">
+                                  {formatNumber(reportData?.data.paymentReport.countAllTimePayment || 0)}
+                                </p>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Total Volume:</p>
+                                <p className="text-secondary font-medium">
+                                  <span className="text-grey-300 font-normal">NGN </span>
+                                  {formatNumber(reportData?.data.paymentReport.totalAllTimePayment || 0)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
-                        {/* Outgoing ends */}
-                        {/* Unresolved starts */}
+
+                        {/* Unresolved Card */}
                         <div className="small-card rounded-md p-2 transition duration-500 md:border">
                           <div className="flex items-center gap-2 border-b pb-4 max-sm:mb-2">
                             <UnresolvedTransactions />
                             Unresolved
                           </div>
-                          <div className="flex flex-col items-end justify-between gap-3 pt-4">
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total:</p>
-                              <div className="flex gap-1">
-                                <p className="text-secondary font-medium">110</p>
-                                <ArrowIcon />
+                          {isLoading ? (
+                            <div className="flex flex-col gap-3 pt-4">
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                              <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                            </div>
+                          ) : isError ? (
+                            <div className="pt-4 text-red-500">Error loading data</div>
+                          ) : (
+                            <div className="flex flex-col items-end justify-between gap-3 pt-4">
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Total:</p>
+                                <div className="flex gap-1">
+                                  <p className="text-secondary font-medium">0</p>
+                                  <ArrowIcon />
+                                </div>
+                              </div>
+                              <div className="flex w-full justify-between">
+                                <p className="text-grey-200">Total Volume:</p>
+                                <p className="text-secondary font-medium">
+                                  <span className="text-grey-300 font-normal">NGN </span>0
+                                </p>
                               </div>
                             </div>
-                            <div className="flex w-full justify-between">
-                              <p className="text-grey-200">Total Volume:</p>
-                              <p className="text-secondary font-medium">
-                                <span className="text-grey-300 font-normal">NGN </span>53,456.00
-                              </p>
-                            </div>
-                          </div>
+                          )}
                         </div>
-                        {/* Unresolved ends */}
                       </div>
                     </div>
                   </div>
                 </div>
-                <AllTransactionTable />
+                <TransactionTable />
               </div>
             </div>
           </div>
