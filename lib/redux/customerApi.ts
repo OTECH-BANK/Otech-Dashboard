@@ -307,7 +307,7 @@ export interface DeactivateCustomerResponse {
 export const customerApi = createApi({
   reducerPath: "customerApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://cba-dev.otechcloud.com/",
+    baseUrl: "http://cba-dev.otechbank.com/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token
       if (token) {

@@ -1,10 +1,7 @@
-// src/lib/redux/store.ts
 import { configureStore } from "@reduxjs/toolkit"
 
-// Feature imports
 import authReducer from "./features/auth/authSlice"
 
-// API imports (alphabetical order might be preferred)
 import { api } from "./api"
 import { customerApi } from "./customerApi"
 import { customerTypeApi } from "./customerTypeApi"
@@ -12,6 +9,7 @@ import { employeeApi } from "./employeeApi"
 import { feesApi } from "./feesApi"
 import { otectplusApi } from "./otechplusApi"
 import { transactionApi } from "./transactionApi"
+import { virtualAccountApi } from "./virtualAccountApi"
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +21,7 @@ export const store = configureStore({
     [feesApi.reducerPath]: feesApi.reducer,
     [otectplusApi.reducerPath]: otectplusApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
+    [virtualAccountApi.reducerPath]: virtualAccountApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -32,6 +31,7 @@ export const store = configureStore({
       .concat(employeeApi.middleware)
       .concat(feesApi.middleware)
       .concat(otectplusApi.middleware)
+      .concat(virtualAccountApi.middleware)
       .concat(transactionApi.middleware),
 })
 

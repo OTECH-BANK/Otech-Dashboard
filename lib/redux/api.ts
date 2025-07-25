@@ -181,7 +181,7 @@ export interface IdentityTypesResponse {
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://cba-dev.otechcloud.com/",
+    baseUrl: "http://cba-dev.otechbank.com/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token
 
@@ -207,7 +207,7 @@ export const api = createApi({
     }),
     login: builder.mutation<LoginResponse, { username: string; password: string }>({
       query: (credentials) => ({
-        url: "api/_Token/GetLoginToken",
+        url: "corecba/api/_Token/GetLoginToken",
         method: "POST",
         body: credentials,
         headers: {

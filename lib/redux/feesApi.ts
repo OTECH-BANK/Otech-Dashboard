@@ -116,7 +116,7 @@ export interface ChannelListResponse {
 export const feesApi = createApi({
   reducerPath: "feesApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://cba-dev.otechcloud.com/",
+    baseUrl: "http://cba-dev.otechbank.com/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token
       if (token) {
