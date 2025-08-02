@@ -1,4 +1,3 @@
-// src/components/AllTransactionTable.tsx
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
@@ -12,11 +11,10 @@ import { SearchModule } from "components/ui/Search/search-module"
 import EmptyState from "public/empty-state"
 import TransactionDetailModal from "components/ui/Modal/transaction-detail-modal"
 import DeleteModal from "components/ui/Modal/delete-modal"
-import { useGetTransactionsQuery } from "lib/redux/transactionApi"
+import { useGetTransactionsByDateRangeQuery } from "lib/redux/transactionApi"
 
 type SortOrder = "asc" | "desc" | null
 
-// We extend Order to include transactionID so that ActionDropdown can pass it back
 export type Order = {
   transactionID: number
   orderId: string
@@ -115,17 +113,47 @@ const AllTransactionTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  // Date range state - fixed initialization
+  const getDefaultStartDate = (): string => {
+    const date = new Date()
+    date.setFullYear(date.getFullYear() - 1)
+    const isoDate = date.toISOString().split("T")[0]
+    return isoDate ? isoDate : new Date().toISOString().split("T")[0]!
+  }
+  const [startDate, setStartDate] = useState<string>(getDefaultStartDate)
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split("T")[0] || "")
+
   // Track which transactionID we clicked "View Details" on
   const [selectedTransactionID, setSelectedTransactionID] = useState<number | null>(null)
   const [isOrderDetailModalOpen, setIsOrderDetailModalOpen] = useState(false)
 
-  // Delete modal state (unchanged)
+  // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Fetch the paginated list of transactions
-  const { data, error, isLoading } = useGetTransactionsQuery({
+  // Format date for API (MM/DD/YYYY)
+  const formatDateForAPI = (dateString: string): string => {
+    try {
+      const date = new Date(dateString)
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const year = date.getFullYear()
+      return `${month.toString().padStart(2, "0")}/${day.toString().padStart(2, "0")}/${year}`
+    } catch {
+      // Fallback to current date if parsing fails
+      const date = new Date()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const year = date.getFullYear()
+      return `${month.toString().padStart(2, "0")}/${day.toString().padStart(2, "0")}/${year}`
+    }
+  }
+
+  // Fetch transactions by date range
+  const { data, error, isLoading, refetch } = useGetTransactionsByDateRangeQuery({
+    startDate: formatDateForAPI(startDate),
+    endDate: formatDateForAPI(endDate),
     pageNumber: currentPage,
     pageSize: itemsPerPage,
   })
@@ -163,7 +191,7 @@ const AllTransactionTable: React.FC = () => {
   }
 
   // Helper function to get first letter of name
-  const getInitial = (name: string) => {
+  const getInitial = (name: string): string => {
     if (!name || name.length === 0) return ""
     return name.charAt(0).toUpperCase()
   }
@@ -229,9 +257,7 @@ const AllTransactionTable: React.FC = () => {
   const handleConfirmDelete = async (reason: string) => {
     setIsDeleting(true)
     try {
-      // Call your delete endpoint here, passing orderToDelete.transactionID if needed
       console.log("Deleting transaction:", orderToDelete?.orderId, "Reason:", reason)
-
       setIsDeleteModalOpen(false)
       setOrderToDelete(null)
     } catch (error) {
@@ -239,6 +265,34 @@ const AllTransactionTable: React.FC = () => {
     } finally {
       setIsDeleting(false)
     }
+  }
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStartDate = e.target.value
+    setStartDate(newStartDate)
+    if (newStartDate > endDate) {
+      setEndDate(newStartDate)
+    }
+    setCurrentPage(1)
+  }
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEndDate = e.target.value
+    setEndDate(newEndDate)
+    if (newEndDate < startDate) {
+      setStartDate(newEndDate)
+    }
+    setCurrentPage(1)
+  }
+
+  const handleApplyDateRange = () => {
+    refetch()
+  }
+
+  const handleResetDateRange = () => {
+    setStartDate(getDefaultStartDate())
+    setEndDate(new Date().toISOString().split("T")[0] || "")
+    setCurrentPage(1)
   }
 
   // Filter, sort, and paginate
@@ -335,10 +389,41 @@ const AllTransactionTable: React.FC = () => {
         </div>
       </div>
 
+      {/* Date Range Filter */}
+      <div className="my-4 flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Date Range:</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={handleStartDateChange}
+              max={endDate}
+              className="rounded border p-2 text-sm"
+            />
+            <span>to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={handleEndDateChange}
+              min={startDate}
+              max={new Date().toISOString().split("T")[0]}
+              className="rounded border p-2 text-sm"
+            />
+          </div>
+        </div>
+        <ButtonModule variant="primary" size="sm" onClick={handleApplyDateRange}>
+          Apply
+        </ButtonModule>
+        <ButtonModule variant="outline" size="sm" onClick={handleResetDateRange}>
+          Reset
+        </ButtonModule>
+      </div>
+
       {orders.length === 0 ? (
         <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
           <EmptyState />
-          <p className="text-base font-bold text-[#202B3C]">No transactions found.</p>
+          <p className="text-base font-bold text-[#202B3C]">No transactions found for the selected date range.</p>
         </div>
       ) : (
         <>

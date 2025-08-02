@@ -66,6 +66,13 @@ export interface TransactionDetailsResponse {
   succeeded: boolean
 }
 
+export interface DateRangeParams {
+  startDate: string
+  endDate: string
+  pageNumber: number
+  pageSize: number
+}
+
 export const transactionApi = createApi({
   reducerPath: "transactionApi",
   baseQuery: fetchBaseQuery({
@@ -80,9 +87,15 @@ export const transactionApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getTransactions: builder.query<TransactionsResponse, { pageNumber: number; pageSize: number }>({
-      query: ({ pageNumber, pageSize }) => ({
-        url: `api/Transaction/TransactionList/${pageNumber}/${pageSize}`,
+    getTransactionsByDateRange: builder.query<TransactionsResponse, DateRangeParams>({
+      query: ({ startDate, endDate, pageNumber, pageSize }) => ({
+        url: `api/Transaction/TransactionsByDateRange`,
+        params: {
+          StartDate: startDate,
+          EndDate: endDate,
+          PageNumber: pageNumber,
+          PageSize: pageSize,
+        },
         method: "GET",
       }),
     }),
@@ -95,4 +108,4 @@ export const transactionApi = createApi({
   }),
 })
 
-export const { useGetTransactionsQuery, useGetTransactionDetailsQuery } = transactionApi
+export const { useGetTransactionsByDateRangeQuery, useGetTransactionDetailsQuery } = transactionApi

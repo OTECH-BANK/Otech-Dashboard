@@ -10,6 +10,7 @@ import { feesApi } from "./feesApi"
 import { otectplusApi } from "./otechplusApi"
 import { transactionApi } from "./transactionApi"
 import { virtualAccountApi } from "./virtualAccountApi"
+import { metricApi } from "./metricApi"
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     [otectplusApi.reducerPath]: otectplusApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
     [virtualAccountApi.reducerPath]: virtualAccountApi.reducer,
+    [metricApi.reducerPath]: metricApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -32,7 +34,8 @@ export const store = configureStore({
       .concat(feesApi.middleware)
       .concat(otectplusApi.middleware)
       .concat(virtualAccountApi.middleware)
-      .concat(transactionApi.middleware),
+      .concat(transactionApi.middleware)
+      .concat(metricApi.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

@@ -8,7 +8,6 @@ import Filtericon from "public/filter-icon"
 import { RxDotsVertical } from "react-icons/rx"
 import DeleteModal from "components/ui/Modal/delete-modal"
 import AddEmployeeModal from "components/ui/Modal/add-employee-modal"
-
 import { useGetEmployeesQuery } from "lib/redux/employeeApi"
 
 // Skeleton Loader Component
@@ -41,7 +40,6 @@ const EmployeeCardSkeleton = () => (
 
 export default function EmployeePage() {
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false)
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -62,17 +60,18 @@ export default function EmployeePage() {
 
   // Fetch employees data
   const {
-    data: employeesData,
+    data: employeesResponse,
     isLoading,
     isError,
-    refetch, // Add this to destructure the refetch function
+    error,
+    refetch,
   } = useGetEmployeesQuery({
     pageNumber,
     pageSize,
   })
 
   const handleEdit = (id: string) => {
-    const employee = employeesData?.data.find((e) => e.userID === id)
+    const employee = employeesResponse?.data?.find((e) => e.userID === id)
     if (employee) {
       setEditModalState({
         isOpen: true,
@@ -137,7 +136,7 @@ export default function EmployeePage() {
   }
 
   const handleDelete = (id: string) => {
-    const employee = employeesData?.data.find((e) => e.userID === id)
+    const employee = employeesResponse?.data?.find((e) => e.userID === id)
     if (employee) {
       setDeleteModalState({
         isOpen: true,
@@ -174,7 +173,6 @@ export default function EmployeePage() {
   }
 
   const handleViewDetails = (id: string) => {
-    // Store the employee ID in local storage
     if (typeof window !== "undefined") {
       localStorage.setItem("selectedEmployeeId", id)
     }
@@ -206,7 +204,42 @@ export default function EmployeePage() {
       .toUpperCase()
   }
 
-  if (isError) return <div className="p-4 text-red-500">Error loading employees</div>
+  if (isError) {
+    return (
+      <>
+        <div className="p-4 text-red-500">
+          Error loading employees
+          <ButtonModule
+            variant="primary"
+            size="md"
+            icon={<AddBusiness />}
+            iconPosition="start"
+            onClick={() => setIsAddEmployeeModalOpen(true)}
+          >
+            Add Employee
+          </ButtonModule>
+        </div>
+        <AddEmployeeModal
+          isOpen={isAddEmployeeModalOpen}
+          onRequestClose={() => setIsAddEmployeeModalOpen(false)}
+          onSuccess={() => {
+            refetch()
+          }}
+        />
+      </>
+    )
+  }
+
+  if (employeesResponse && !employeesResponse.succeeded) {
+    return (
+      <div className="p-4 text-yellow-600">
+        {employeesResponse.message || "No employee data available"}
+        <button onClick={() => refetch()} className="ml-2 text-blue-500 underline">
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
     <section className="h-full w-full">
@@ -235,110 +268,112 @@ export default function EmployeePage() {
                       isFilterOpen ? "lg-grid-cols-2 2xl:grid-cols-3" : ""
                     }`}
                   >
-                    {isLoading
-                      ? // Show skeleton loaders while loading
-                        Array.from({ length: 8 }).map((_, index) => <EmployeeCardSkeleton key={`skeleton-${index}`} />)
-                      : // Show actual employee data when loaded
-                        employeesData?.data.map((employee) => (
-                          <div key={employee.userID} className="relative rounded-lg bg-white p-4 shadow-lg">
-                            <div className="flex gap-4">
-                              <div className="relative h-[46px] w-[46px]">
-                                <div className="text-grey-600 flex h-[44px] w-[44px] items-center justify-center rounded-md bg-[#F5F8FA] font-medium">
-                                  {getInitials(employee.employeeFullName)}
-                                </div>
-                                <div
-                                  className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
-                                    employee.isactive ? "bg-[#27AE60]" : "bg-[#94A3B8]"
-                                  }`}
-                                ></div>
+                    {isLoading ? (
+                      Array.from({ length: 8 }).map((_, index) => <EmployeeCardSkeleton key={`skeleton-${index}`} />)
+                    ) : employeesResponse?.data?.length ? (
+                      employeesResponse.data.map((employee) => (
+                        <div key={employee.userID} className="relative rounded-lg bg-white p-4 shadow-lg">
+                          <div className="flex gap-4">
+                            <div className="relative h-[46px] w-[46px]">
+                              <div className="text-grey-600 flex h-[44px] w-[44px] items-center justify-center rounded-md bg-[#F5F8FA] font-medium">
+                                {getInitials(employee.employeeFullName)}
                               </div>
+                              <div
+                                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
+                                  employee.isactive ? "bg-[#27AE60]" : "bg-[#94A3B8]"
+                                }`}
+                              ></div>
+                            </div>
 
-                              <div className="flex-1">
-                                <h3 className="text-base font-bold">{employee.employeeFullName}</h3>
-                                <p className="text-sm">{employee.employeeEmail}</p>
-                              </div>
-                              <div className="relative" ref={dropdownRef}>
-                                <button
-                                  onClick={() => toggleDropdown(employee.userID)}
-                                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                                >
-                                  <RxDotsVertical />
-                                </button>
-                                {/* {openDropdownId === employee.userID && (
-                                  <div className="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                                    <div className="py-1">
-                                      <button
-                                        onClick={() => handleEdit(employee.userID)}
-                                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                                      >
-                                        Edit
-                                      </button>
-                                      <button
-                                        onClick={() => handleDelete(employee.userID)}
-                                        className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
-                                      >
-                                        Delete
-                                      </button>
-                                    </div>
+                            <div className="flex-1">
+                              <h3 className="text-base font-bold">{employee.employeeFullName}</h3>
+                              <p className="text-sm">{employee.employeeEmail}</p>
+                            </div>
+                            <div className="relative" ref={dropdownRef}>
+                              <button
+                                onClick={() => toggleDropdown(employee.userID)}
+                                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                              >
+                                <RxDotsVertical />
+                              </button>
+                              {openDropdownId === employee.userID && (
+                                <div className="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                                  <div className="py-1">
+                                    <button
+                                      onClick={() => handleEdit(employee.userID)}
+                                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(employee.userID)}
+                                      className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
+                                    >
+                                      Delete
+                                    </button>
                                   </div>
-                                )} */}
-                              </div>
-                            </div>
-
-                            <div className="my-4 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-grey-400">Role:</span>
-                                  <span className="font-medium">{employee.userRoleName}</span>
                                 </div>
-                              </div>
-
-                              <div className="flex flex-col items-end text-sm">
-                                <span className="flex items-center gap-2">
-                                  <span
-                                    className={`text-sm ${employee.isactive ? "text-[#27AE60]" : "text-[#D82E2E]"}`}
-                                  >
-                                    {employee.isactive ? "Active" : "Inactive"}
-                                  </span>
-                                </span>
-                              </div>
+                              )}
                             </div>
-
-                            <div className="mt-2 flex items-center justify-between gap-2 text-sm">
-                              <div className="flex items-center gap-2">
-                                <span className="text-grey-400">Branch:</span>
-                                <span className="font-medium">{employee.branchName}</span>
-                              </div>
-                            </div>
-
-                            <div className="text-grey-600 mt-4 rounded-md bg-[#F5F8FA] p-3">
-                              <div className="flex justify-between text-sm">
-                                <span>Mobile:</span>
-                                <span className="text-grey-300">
-                                  <span className="text-base font-bold text-[#202B3C]">{employee.employeeMobile}</span>
-                                </span>
-                              </div>
-                              <div className="mt-2 flex justify-between text-sm">
-                                <span>Created:</span>
-                                <span className="text-grey-300">
-                                  <span className="text-base font-bold text-[#202B3C]">
-                                    {new Date(employee.createdate).toLocaleDateString()}
-                                  </span>
-                                </span>
-                              </div>
-                            </div>
-
-                            <ButtonModule
-                              className="mt-4"
-                              variant="black"
-                              size="md"
-                              iconPosition="end"
-                              onClick={() => handleViewDetails(employee.userID)}
-                            >
-                              View Details
-                            </ButtonModule>
                           </div>
-                        ))}
+
+                          <div className="my-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
+                                <span className="text-grey-400">Role:</span>
+                                <span className="font-medium">{employee.userRoleName}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end text-sm">
+                              <span className="flex items-center gap-2">
+                                <span className={`text-sm ${employee.isactive ? "text-[#27AE60]" : "text-[#D82E2E]"}`}>
+                                  {employee.isactive ? "Active" : "Inactive"}
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-2 flex items-center justify-between gap-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="text-grey-400">Branch:</span>
+                              <span className="font-medium">{employee.branchName}</span>
+                            </div>
+                          </div>
+
+                          <div className="text-grey-600 mt-4 rounded-md bg-[#F5F8FA] p-3">
+                            <div className="flex justify-between text-sm">
+                              <span>Mobile:</span>
+                              <span className="text-grey-300">
+                                <span className="text-base font-bold text-[#202B3C]">{employee.employeeMobile}</span>
+                              </span>
+                            </div>
+                            <div className="mt-2 flex justify-between text-sm">
+                              <span>Created:</span>
+                              <span className="text-grey-300">
+                                <span className="text-base font-bold text-[#202B3C]">
+                                  {new Date(employee.createdate).toLocaleDateString()}
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <ButtonModule
+                            className="mt-4"
+                            variant="black"
+                            size="md"
+                            iconPosition="end"
+                            onClick={() => handleViewDetails(employee.userID)}
+                          >
+                            View Details
+                          </ButtonModule>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full p-4 text-center text-gray-500">
+                        No employees found. {employeesResponse?.message || ""}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -350,7 +385,7 @@ export default function EmployeePage() {
         isOpen={isAddEmployeeModalOpen}
         onRequestClose={() => setIsAddEmployeeModalOpen(false)}
         onSuccess={() => {
-          refetch() // This will refetch the employee data
+          refetch()
         }}
       />
 
