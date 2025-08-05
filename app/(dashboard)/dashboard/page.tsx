@@ -11,7 +11,7 @@ import InsightIcon from "public/insight-icon"
 import ExchangeRateMarquee from "components/ui/ExchangeRate/exchange-rate"
 import RecentTransactionTable from "components/Tables/TransactionTable"
 import { useGetDashboardMetricsQuery } from "lib/redux/metricApi"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface PaymentAccount {
   id: number

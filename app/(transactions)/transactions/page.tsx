@@ -13,9 +13,9 @@ import UnresolvedTransactions from "public/unresolved-transactions"
 import ArrowIcon from "public/arrow-icon"
 import AllTransactionTable from "components/Tables/AllTransactionstable"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useGetTransactionsByDateRangeQuery } from "lib/redux/transactionApi"
-import { subYears, format } from "date-fns"
+import { format, subYears } from "date-fns"
 import { ButtonModule } from "components/ui/Button/Button"
 
 interface PaymentAccount {

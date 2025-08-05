@@ -7,7 +7,7 @@ import ExportIcon from "public/export-icon"
 import EmptyState from "public/empty-state"
 import { ButtonModule } from "components/ui/Button/Button"
 import { SearchModule } from "components/ui/Search/search-module"
-import { VirtualAccount, useGetVirtualAccountsQuery, useGetVirtualAccountByIdQuery } from "lib/redux/virtualAccountApi"
+import { useGetVirtualAccountsQuery, VirtualAccount } from "lib/redux/virtualAccountApi"
 import VirtualAccountDetailModal from "components/ui/Modal/virtual-account-detail-modal"
 
 type SortOrder = "asc" | "desc" | null
