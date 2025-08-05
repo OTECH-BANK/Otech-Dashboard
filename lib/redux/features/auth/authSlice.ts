@@ -3,7 +3,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 interface AuthState {
   token: string | null
-  user: { username: string } | null
+  user: {
+    username: string
+    fullname: string
+    userrole: string
+  } | null
   isAuthenticated: boolean
   loading: boolean
   error: string | null
@@ -13,7 +17,11 @@ function isAuthState(obj: any): obj is AuthState {
   return (
     (obj.token === null || typeof obj.token === "string") &&
     (obj.user === null ||
-      (typeof obj.user === "object" && obj.user !== null && typeof obj.user.username === "string")) &&
+      (typeof obj.user === "object" &&
+        obj.user !== null &&
+        typeof obj.user.username === "string" &&
+        typeof obj.user.fullname === "string" &&
+        typeof obj.user.userrole === "string")) &&
     typeof obj.isAuthenticated === "boolean" &&
     typeof obj.loading === "boolean" &&
     (obj.error === null || typeof obj.error === "string")
@@ -49,14 +57,26 @@ const authSlice = createSlice({
       state.loading = true
       state.error = null
     },
-    loginSuccess(state, action: PayloadAction<{ token: string; username: string }>) {
+    loginSuccess(
+      state,
+      action: PayloadAction<{
+        token: string
+        username: string
+        fullname: string
+        userrole: string
+      }>
+    ) {
       state.token = action.payload.token
-      state.user = { username: action.payload.username }
+      state.user = {
+        username: action.payload.username,
+        fullname: action.payload.fullname,
+        userrole: action.payload.userrole,
+      }
       state.isAuthenticated = true
       state.loading = false
       state.error = null
       if (typeof window !== "undefined") {
-        localStorage.setItem("auth", JSON.stringify({ ...state }))
+        localStorage.setItem("auth", JSON.stringify(state))
       }
     },
     loginFailure(state, action: PayloadAction<string>) {
@@ -77,12 +97,8 @@ const authSlice = createSlice({
         localStorage.removeItem("auth")
       }
     },
-    setAuthState(state, action: PayloadAction<AuthState>) {
-      return action.payload
-    },
   },
 })
 
-export const { loginStart, loginSuccess, loginFailure, logout, setAuthState } = authSlice.actions
-
+export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions
 export default authSlice.reducer

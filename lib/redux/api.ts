@@ -1,6 +1,7 @@
 // src/lib/redux/api.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import type { RootState } from "./store"
+import { logout } from "./features/auth/authSlice"
 
 export interface Bank {
   bankCode: string
@@ -178,22 +179,32 @@ export interface IdentityTypesResponse {
   succeeded: boolean
 }
 
-export const api = createApi({
-  reducerPath: "api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "http://cba-dev.otechbank.com/",
+const baseQueryWithAuth = async (args: any, api: any, extraOptions: any) => {
+  const result = await fetchBaseQuery({
+    baseUrl: "https://corecba.otechbank.com/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token
-
       if (token) {
-        const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-        headers.set("Authorization", authToken)
+        headers.set("Authorization", `Bearer ${token}`)
       }
-
       headers.set("accept", "*/*")
       return headers
     },
-  }),
+  })(args, api, extraOptions)
+
+  if (result.error?.status === 401) {
+    api.dispatch(logout())
+    if (typeof window !== "undefined") {
+      window.location.href = "/login"
+    }
+  }
+
+  return result
+}
+
+export const api = createApi({
+  reducerPath: "api",
+  baseQuery: baseQueryWithAuth,
   endpoints: (builder) => ({
     getBanks: builder.query<Bank[], void>({
       query: () => "api/Bank/BankList",
@@ -211,7 +222,6 @@ export const api = createApi({
         method: "POST",
         body: credentials,
         headers: {
-          accept: "*/*",
           "Content-Type": "application/json",
         },
       }),
@@ -234,9 +244,9 @@ export const api = createApi({
     }),
     getLGAsByState: builder.query<LGAsResponse, number>({
       query: (stateID) => ({
-        url: `api/Setup/StateLGAList?StateID=${stateID}`, // Add StateID to URL
+        url: `api/Setup/StateLGAList?StateID=${stateID}`,
         method: "POST",
-        body: { stateID }, // Also include in body
+        body: { stateID },
       }),
     }),
     getCustomerTypes: builder.query<CustomerTypesResponse, void>({

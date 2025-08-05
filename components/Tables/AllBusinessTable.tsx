@@ -42,7 +42,7 @@ const AllBusinessTable = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(10)
   const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null)
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -53,10 +53,9 @@ const AllBusinessTable = () => {
     pageSize: pageSize,
   })
 
-  // Add this effect to refetch data when component mounts
   useEffect(() => {
     refetch()
-  }, [refetch])
+  }, [refetch, pageSize])
 
   const getPaymentStyle = (status: string) => {
     switch (status) {
@@ -104,12 +103,53 @@ const AllBusinessTable = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSize = Number(e.target.value)
+    setPageSize(newSize)
+    setCurrentPage(1)
+  }
+
+  const exportToCSV = () => {
+    const headers = [
+      "Business ID",
+      "Name",
+      "Brand Name",
+      "Website",
+      "Callback URL",
+      "Email",
+      "Status",
+      "Account Number",
+      "Date Created",
+    ]
+
+    const dataRows = filteredBusinesses.map((business) => [
+      business.businessID,
+      `"${business.name.replace(/"/g, '""')}"`,
+      `"${business.brandName.replace(/"/g, '""')}"`,
+      business.website,
+      business.callbackUrl || "N/A",
+      business.email,
+      business.status || "Active",
+      business.accountNumber || "N/A",
+      new Date(business.dateCreated).toLocaleDateString(),
+    ])
+
+    const csvContent = [headers.join(","), ...dataRows.map((row) => row.join(","))].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", `businesses_export_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const handleDisable = async (reason: string) => {
     setIsProcessing(true)
     try {
-      // Here you would typically call your API to disable the business
       console.log("Disabling business:", selectedBusiness?.businessID, "Reason:", reason)
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
       setIsDisableModalOpen(false)
     } catch (error) {
@@ -122,9 +162,7 @@ const AllBusinessTable = () => {
   const handleDelete = async (reason: string) => {
     setIsProcessing(true)
     try {
-      // Here you would typically call your API to delete the business
       console.log("Deleting business:", selectedBusiness?.businessID, "Reason:", reason)
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
       setIsDeleteModalOpen(false)
     } catch (error) {
@@ -202,7 +240,6 @@ const AllBusinessTable = () => {
   if (isLoading) {
     return (
       <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
-        {/* Header Skeleton */}
         <div className="items-center justify-between border-b py-2 md:flex md:py-4">
           <div className="h-8 w-40 animate-pulse rounded bg-gray-200 max-sm:pb-3"></div>
           <div className="flex gap-4">
@@ -211,7 +248,6 @@ const AllBusinessTable = () => {
           </div>
         </div>
 
-        {/* Table Skeleton */}
         <div className="w-full overflow-x-auto border-l border-r bg-[#f9f9f9]">
           <table className="w-full min-w-[800px] border-separate border-spacing-0 text-left">
             <thead>
@@ -240,7 +276,6 @@ const AllBusinessTable = () => {
           </table>
         </div>
 
-        {/* Pagination Skeleton */}
         <div className="flex items-center justify-between border-t px-4 py-3">
           <div className="h-4 w-40 animate-pulse rounded bg-gray-200"></div>
           <div className="flex gap-2">
@@ -255,7 +290,6 @@ const AllBusinessTable = () => {
 
   return (
     <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
-      {/* Header */}
       <div className="items-center justify-between border-b py-2 md:flex md:py-4">
         <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">All Businesses</p>
         <div className="flex gap-4">
@@ -264,21 +298,15 @@ const AllBusinessTable = () => {
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
-            variant="black"
-            size="md"
-            icon={<ExportIcon />}
-            iconPosition="end"
-            onClick={() => alert("Button clicked!")}
-          >
+          <ButtonModule variant="black" size="md" icon={<ExportIcon />} iconPosition="end" onClick={exportToCSV}>
             <p className="max-sm:hidden">Export</p>
           </ButtonModule>
         </div>
       </div>
 
       {error ? (
-        <div className="flex h-60 flex-col items-center justify-center  bg-[#f9f9f9]">
-          <div className="flex flex-col items-center justify-center  text-center">
+        <div className="flex h-60 flex-col items-center justify-center bg-[#f9f9f9]">
+          <div className="flex flex-col items-center justify-center text-center">
             <EmptyState />
             <p className="mt-2 text-xl font-bold text-[#D82E2E]">Failed to load businesses.</p>
             <p>Please refresh or try again later.</p>
@@ -416,11 +444,26 @@ const AllBusinessTable = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between border-t px-4 py-3">
-            <div className="text-sm text-gray-700">
-              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, data?.totalRecords || 0)}{" "}
-              of {data?.totalRecords || 0} entries
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-700">
+                Showing {(currentPage - 1) * pageSize + 1} to{" "}
+                {Math.min(currentPage * pageSize, data?.totalRecords || 0)} of {data?.totalRecords || 0} entries
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span>Rows per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                >
+                  {[10, 25, 50, 100].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <button

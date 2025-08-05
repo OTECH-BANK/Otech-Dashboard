@@ -76,7 +76,7 @@ export interface DateRangeParams {
 export const transactionApi = createApi({
   reducerPath: "transactionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://cba-dev.otechbank.com/",
+    baseUrl: "https://corecba.otechbank.com/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token
       if (token) {

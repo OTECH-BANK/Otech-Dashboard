@@ -168,15 +168,6 @@ export default function ChannelList() {
               >
                 Add Channel
               </ButtonModule>
-              <ButtonModule
-                variant="secondary"
-                size="md"
-                icon={<Filtericon />}
-                iconPosition="end"
-                onClick={toggleFilter}
-              >
-                Filter
-              </ButtonModule>
             </div>
           </div>
 

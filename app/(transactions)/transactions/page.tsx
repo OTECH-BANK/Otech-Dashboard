@@ -29,7 +29,7 @@ export default function AllTransactions() {
   const [startDate, setStartDate] = useState<Date>(subYears(new Date(), 1))
   const [endDate, setEndDate] = useState<Date>(new Date())
   const [pageNumber, setPageNumber] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(1000)
 
   // Format date as MM/DD/YYYY for API request
   const formatDateForApi = (date: Date) => {

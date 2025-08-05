@@ -394,7 +394,7 @@ export interface MakeAdminRequest {
 
 const baseQuery = retry(
   fetchBaseQuery({
-    baseUrl: "https://otechpaygo-dev.otechcloud.com/api/",
+    baseUrl: "https://fastpay.otechbank.com/api/",
     prepareHeaders: (headers, { getState }) => {
       // First try to get token from Redux state
       const token = (getState() as RootState).auth.token

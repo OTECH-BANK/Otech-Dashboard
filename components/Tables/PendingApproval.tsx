@@ -37,12 +37,9 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.preventDefault()
-    // 1) Store the entire “customer” object in localStorage (so the detail page can read it).
     localStorage.setItem("selectedCustomer", JSON.stringify(customer))
     onViewDetails(customer)
     setIsOpen(false)
-
-    // 2) Navigate to `/customers/customer-detail/{customerID}`
     router.push(`/customers/customer-detail/${customer.customerID}`)
   }
 
@@ -58,7 +55,6 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails
         <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             <a
-              // We don’t need a real `href` because we call push() programmatically
               href={`/customers/customer-detail/${customer.customerID}`}
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               onClick={handleViewDetails}
@@ -146,7 +142,7 @@ const PendingApproval: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10) // Changed to state variable
 
   // Fetch customers using RTK Query
   const {
@@ -159,11 +155,9 @@ const PendingApproval: React.FC = () => {
   })
 
   const customerItems = customersResponse?.data || []
-  // We only extract the `.customer` object here for listing
   const customers = customerItems.map((item) => item.customer)
   const totalRecords = customersResponse?.totalRecords || 0
 
-  // State & Handlers for modals
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [isCustomerDetailModalOpen, setIsCustomerDetailModalOpen] = useState(false)
 
@@ -190,6 +184,57 @@ const PendingApproval: React.FC = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
+  // Handle page size change
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSize = Number(e.target.value)
+    setPageSize(newSize)
+    setCurrentPage(1) // Reset to first page when changing page size
+  }
+
+  // Export to CSV function
+  const exportToCSV = () => {
+    // Prepare headers
+    const headers = [
+      "Customer ID",
+      "Customer Name",
+      "Email",
+      "Phone",
+      "Address",
+      "Status",
+      "Customer Type",
+      "Date Created",
+    ]
+
+    // Prepare data rows
+    const dataRows = filteredCustomers.map((customer) => [
+      customer.customerID,
+      customer.fullName || `${customer.firstName} ${customer.lastName}`,
+      customer.customerEmailAdd || "N/A",
+      customer.mobile || customer.phoneNumber || "N/A",
+      customer.customerAddress || "N/A",
+      customer.customerStatus ? "Active" : "Inactive",
+      customer.customerTypeID === 1 ? "Individual" : "Corporate",
+      new Date(customer.createdate).toLocaleDateString(),
+    ])
+
+    // Combine headers and data
+    const csvContent = [
+      headers.join(","),
+      ...dataRows.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(",")),
+    ].join("\n")
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", `pending_customers_${new Date().toISOString().slice(0, 10)}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (isLoading) {
     return <LoadingSkeleton />
   }
@@ -210,20 +255,14 @@ const PendingApproval: React.FC = () => {
     <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-5">
       {/* Header */}
       <div className="items-center justify-between border-b py-2 md:flex md:py-4">
-        <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">All Customers</p>
+        <p className="text-lg font-medium max-sm:pb-3 md:text-2xl">Pending Approval</p>
         <div className="flex gap-4">
           <SearchModule
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
-            variant="black"
-            size="md"
-            icon={<ExportIcon />}
-            iconPosition="end"
-            onClick={() => alert("Export clicked!")}
-          >
+          <ButtonModule variant="black" size="md" icon={<ExportIcon />} iconPosition="end" onClick={exportToCSV}>
             <p className="max-sm:hidden">Export</p>
           </ButtonModule>
         </div>
@@ -232,7 +271,7 @@ const PendingApproval: React.FC = () => {
       {filteredCustomers.length === 0 ? (
         <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
           <EmptyState />
-          <p className="text-base font-bold text-[#202B3C]">No customers found.</p>
+          <p className="text-base font-bold text-[#202B3C]">No pending customers found.</p>
         </div>
       ) : (
         <>
@@ -366,9 +405,25 @@ const PendingApproval: React.FC = () => {
 
           {/* Pagination */}
           <div className="flex items-center justify-between border-t px-4 py-3">
-            <div className="text-sm text-gray-700">
-              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalRecords)} of{" "}
-              {totalRecords} entries
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-700">
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalRecords)} of{" "}
+                {totalRecords} entries
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span>Rows per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                >
+                  {[10, 25, 50, 100].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <button

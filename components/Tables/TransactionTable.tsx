@@ -1,7 +1,12 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos, MdOutlineCheckBoxOutlineBlank } from "react-icons/md"
+import {
+  MdOutlineArrowBackIosNew,
+  MdOutlineArrowForwardIos,
+  MdOutlineCheckBoxOutlineBlank,
+  MdRefresh,
+} from "react-icons/md"
 import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
 import OutgoingIcon from "public/outgoing-icon"
 import IncomingIcon from "public/incoming-icon"
@@ -107,11 +112,20 @@ const SkeletonRow = () => {
 }
 
 const RecentTransactionTable: React.FC = () => {
-  const [sortColumn, setSortColumn] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<SortOrder>(null)
-  const [searchText, setSearchText] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  // Default values for reset
+  const DEFAULT_ITEMS_PER_PAGE = 10
+  const DEFAULT_SORT_COLUMN = null
+  const DEFAULT_SORT_ORDER = null
+  const DEFAULT_CURRENT_PAGE = 1
+  const DEFAULT_SEARCH_TEXT = ""
+
+  const [sortColumn, setSortColumn] = useState<string | null>(DEFAULT_SORT_COLUMN)
+  const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT_ORDER)
+  const [searchText, setSearchText] = useState(DEFAULT_SEARCH_TEXT)
+  const [currentPage, setCurrentPage] = useState(DEFAULT_CURRENT_PAGE)
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE)
+  const itemsPerPageOptions = [10, 25, 50, 100, 200, 500, 1000]
+  const [refreshKey, setRefreshKey] = useState(0)
 
   // Date range state - fixed initialization
   const getDefaultStartDate = (): string => {
@@ -120,7 +134,8 @@ const RecentTransactionTable: React.FC = () => {
     const isoDate = date.toISOString().split("T")[0]
     return isoDate ? isoDate : new Date().toISOString().split("T")[0]!
   }
-  const [startDate, setStartDate] = useState<string>(getDefaultStartDate)
+
+  const [startDate, setStartDate] = useState<string>(getDefaultStartDate())
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().split("T")[0] || "")
 
   // Track which transactionID we clicked "View Details" on
@@ -131,6 +146,7 @@ const RecentTransactionTable: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Format date for API (MM/DD/YYYY)
   const formatDateForAPI = (dateString: string): string => {
@@ -151,12 +167,36 @@ const RecentTransactionTable: React.FC = () => {
   }
 
   // Fetch transactions by date range
-  const { data, error, isLoading, refetch } = useGetTransactionsByDateRangeQuery({
-    startDate: formatDateForAPI(startDate),
-    endDate: formatDateForAPI(endDate),
-    pageNumber: currentPage,
-    pageSize: itemsPerPage,
-  })
+  const { data, error, isLoading, refetch } = useGetTransactionsByDateRangeQuery(
+    {
+      startDate: formatDateForAPI(startDate),
+      endDate: formatDateForAPI(endDate),
+      pageNumber: currentPage,
+      pageSize: itemsPerPage,
+    },
+    {
+      // Force refetch when refreshKey changes
+      refetchOnMountOrArgChange: true,
+    }
+  )
+
+  // Function to handle full refresh and reset to default state
+  const handleFullRefresh = () => {
+    setIsRefreshing(true)
+    // Reset all filters and pagination to default
+    setCurrentPage(DEFAULT_CURRENT_PAGE)
+    setItemsPerPage(DEFAULT_ITEMS_PER_PAGE)
+    setSortColumn(DEFAULT_SORT_COLUMN)
+    setSortOrder(DEFAULT_SORT_ORDER)
+    setSearchText(DEFAULT_SEARCH_TEXT)
+    setStartDate(getDefaultStartDate())
+    setEndDate(new Date().toISOString().split("T")[0] || "")
+
+    // Force complete reload by changing the refresh key
+    setRefreshKey((prev) => prev + 1)
+    // Also trigger a manual refetch
+    refetch().finally(() => setIsRefreshing(false))
+  }
 
   // Convert API's Transaction shape into our "Order" for listing
   const getStatusText = (status: number): string => {
@@ -260,6 +300,8 @@ const RecentTransactionTable: React.FC = () => {
       console.log("Deleting transaction:", orderToDelete?.orderId, "Reason:", reason)
       setIsDeleteModalOpen(false)
       setOrderToDelete(null)
+      // Refresh after delete
+      handleFullRefresh()
     } catch (error) {
       console.error("Error deleting transaction:", error)
     } finally {
@@ -293,6 +335,52 @@ const RecentTransactionTable: React.FC = () => {
     setStartDate(getDefaultStartDate())
     setEndDate(new Date().toISOString().split("T")[0] || "")
     setCurrentPage(1)
+    refetch()
+  }
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value))
+    setCurrentPage(1)
+    refetch()
+  }
+
+  // Function to export data to CSV
+  const exportToCSV = () => {
+    if (!data?.data) return
+
+    // Transform the data to CSV format
+    const headers = ["Reference ID", "Sender", "Recipient", "Receiving Bank", "Type", "Amount", "Status", "Date"]
+
+    const rows = data.data.map((transaction: any) => {
+      const order = transformTransactionToOrder(transaction)
+      return [
+        `"${order.orderId}"`,
+        `"${order.customer}"`,
+        `"${order.beneficiary}"`,
+        `"${order.bank}"`,
+        `"${order.type}"`,
+        `"NGN ${order.payment70}"`,
+        `"${order.orderStatus}"`,
+        `"${order.date}"`,
+      ].join(",")
+    })
+
+    const csvContent = [headers.join(","), ...rows].join("\n")
+
+    // Create a Blob with the CSV data
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+
+    // Create a temporary anchor element to trigger the download
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", `transactions_${startDate}_to_${endDate}.csv`)
+    document.body.appendChild(link)
+    link.click()
+
+    // Clean up
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   // Filter, sort, and paginate
@@ -307,7 +395,7 @@ const RecentTransactionTable: React.FC = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
-  if (isLoading) {
+  if (isLoading || isRefreshing) {
     return (
       <div className="flex-3 mt-5 flex flex-col rounded-md border bg-white p-3 md:p-5">
         {/* Header Skeleton */}
@@ -359,7 +447,14 @@ const RecentTransactionTable: React.FC = () => {
           <div className="flex flex-col items-center justify-center text-center">
             <EmptyState />
             <p className="text-xl font-bold text-[#D82E2E]">Failed to load transactions.</p>
-            <p>Please refresh or try again later.</p>
+            <p className="mb-4">Please refresh or try again later.</p>
+            <button
+              onClick={handleFullRefresh}
+              className="bg-primary hover:bg-primary-dark flex items-center gap-2 rounded-md px-4 py-2 text-white"
+            >
+              <MdRefresh className={`${isRefreshing ? "animate-spin" : ""}`} />
+              {isRefreshing ? "Refreshing..." : "Refresh Transactions"}
+            </button>
           </div>
         </div>
       </div>
@@ -377,53 +472,77 @@ const RecentTransactionTable: React.FC = () => {
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
-            variant="black"
-            size="md"
-            icon={<ExportIcon />}
-            iconPosition="end"
-            onClick={() => alert("Button clicked!")}
-          >
+          <ButtonModule variant="black" size="md" icon={<ExportIcon />} iconPosition="end" onClick={exportToCSV}>
             <p className="max-sm:hidden">Export CSV</p>
+          </ButtonModule>
+          <ButtonModule
+            variant="outline"
+            size="md"
+            icon={<MdRefresh className={`${isRefreshing ? "animate-spin" : ""}`} />}
+            onClick={handleFullRefresh}
+            disabled={isRefreshing}
+          >
+            <p className="max-sm:hidden">{isRefreshing ? "Refreshing..." : "Refresh"}</p>
           </ButtonModule>
         </div>
       </div>
 
-      {/* Date Range Filter */}
-      <div className="my-4 flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">Date Range:</label>
+      <div className="my-4 flex flex-wrap items-center justify-between gap-4">
+        {/* Date Range Filter */}
+        <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={startDate}
-              onChange={handleStartDateChange}
-              max={endDate}
-              className="rounded border p-2 text-sm"
-            />
-            <span>to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={handleEndDateChange}
-              min={startDate}
-              max={new Date().toISOString().split("T")[0]}
-              className="rounded border p-2 text-sm"
-            />
+            <label className="text-sm font-medium">Date Range:</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={startDate}
+                onChange={handleStartDateChange}
+                max={endDate}
+                className="rounded border p-2 text-sm"
+              />
+              <span>to</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={handleEndDateChange}
+                min={startDate}
+                max={new Date().toISOString().split("T")[0]}
+                className="rounded border p-2 text-sm"
+              />
+            </div>
           </div>
+          <ButtonModule variant="primary" size="sm" onClick={handleApplyDateRange}>
+            Apply
+          </ButtonModule>
+          <ButtonModule variant="outline" size="sm" onClick={handleResetDateRange}>
+            Reset
+          </ButtonModule>
         </div>
-        <ButtonModule variant="primary" size="sm" onClick={handleApplyDateRange}>
-          Apply
-        </ButtonModule>
-        <ButtonModule variant="outline" size="sm" onClick={handleResetDateRange}>
-          Reset
-        </ButtonModule>
+
+        {/* Items per page selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Items per page:</label>
+          <select value={itemsPerPage} onChange={handleItemsPerPageChange} className="rounded border p-2 text-sm">
+            {itemsPerPageOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {orders.length === 0 ? (
         <div className="flex h-60 flex-col items-center justify-center gap-2 bg-[#f9f9f9]">
           <EmptyState />
           <p className="text-base font-bold text-[#202B3C]">No transactions found for the selected date range.</p>
+          <button
+            onClick={handleFullRefresh}
+            className="bg-primary hover:bg-primary-dark flex items-center gap-2 rounded-md px-4 py-2 text-white"
+          >
+            <MdRefresh className={`${isRefreshing ? "animate-spin" : ""}`} />
+            {isRefreshing ? "Refreshing..." : "Refresh"}
+          </button>
         </div>
       ) : (
         <>

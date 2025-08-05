@@ -140,7 +140,7 @@ const VirtualAccountsTable: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10) // Changed to state variable
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null)
 
   // Fetch virtual accounts using RTK Query
@@ -181,6 +181,48 @@ const VirtualAccountsTable: React.FC = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
+  // Handle page size change
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSize = Number(e.target.value)
+    setPageSize(newSize)
+    setCurrentPage(1) // Reset to first page when changing page size
+  }
+
+  // Export to CSV function
+  const exportToCSV = () => {
+    // Prepare headers
+    const headers = ["Account ID", "Name", "Email", "Phone", "Amount", "Account Number", "Business", "Status"]
+
+    // Prepare data rows
+    const dataRows = filteredAccounts.map((account) => [
+      account.virtualAccountID,
+      `${account.firstName} ${account.lastName}`,
+      account.email || "N/A",
+      account.phoneNumber || "N/A",
+      account.amount.toLocaleString(),
+      account.accountNumber,
+      account.business,
+      account.allowOverPay && account.allowUnderPay ? "Active" : "Inactive",
+    ])
+
+    // Combine headers and data
+    const csvContent = [
+      headers.join(","),
+      ...dataRows.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(",")),
+    ].join("\n")
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", `virtual_accounts_${new Date().toISOString().slice(0, 10)}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (isLoading) {
     return <LoadingSkeleton />
   }
@@ -208,13 +250,7 @@ const VirtualAccountsTable: React.FC = () => {
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
-            variant="black"
-            size="md"
-            icon={<ExportIcon />}
-            iconPosition="end"
-            onClick={() => alert("Export clicked!")}
-          >
+          <ButtonModule variant="black" size="md" icon={<ExportIcon />} iconPosition="end" onClick={exportToCSV}>
             <p className="max-sm:hidden">Export</p>
           </ButtonModule>
         </div>
@@ -347,9 +383,25 @@ const VirtualAccountsTable: React.FC = () => {
 
           {/* Pagination */}
           <div className="flex items-center justify-between border-t px-4 py-3">
-            <div className="text-sm text-gray-700">
-              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalRecords)} of{" "}
-              {totalRecords} entries
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-700">
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalRecords)} of{" "}
+                {totalRecords} entries
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span>Rows per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                >
+                  {[10, 25, 50, 100].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <button

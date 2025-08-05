@@ -33,7 +33,7 @@ export interface CreateCustomerTypeResponse {
 export const customerTypeApi = createApi({
   reducerPath: "customerTypeApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://cba-dev.otechbank.com/",
+    baseUrl: "https://corecba.otechbank.com/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token
       if (token) {

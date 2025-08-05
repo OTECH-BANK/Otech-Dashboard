@@ -197,7 +197,7 @@ const DebitFeesTable = ({ refreshKey }: { refreshKey?: number }) => {
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
+          {/* <ButtonModule
             variant="black"
             size="md"
             icon={<ExportIcon />}
@@ -205,7 +205,7 @@ const DebitFeesTable = ({ refreshKey }: { refreshKey?: number }) => {
             onClick={() => alert("Button clicked!")}
           >
             <p className="max-sm:hidden">Export CSV</p>
-          </ButtonModule>
+          </ButtonModule> */}
         </div>
       </div>
 

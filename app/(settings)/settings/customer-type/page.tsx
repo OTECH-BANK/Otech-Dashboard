@@ -169,15 +169,6 @@ export default function CustomerType() {
               >
                 Add Customer Type
               </ButtonModule>
-              <ButtonModule
-                variant="secondary"
-                size="md"
-                icon={<Filtericon />}
-                iconPosition="end"
-                onClick={toggleFilter}
-              >
-                Filter
-              </ButtonModule>
             </div>
           </div>
 
