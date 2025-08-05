@@ -44,6 +44,8 @@ const SignIn: React.FC = () => {
           loginSuccess({
             token: token,
             username: username,
+            fullname: "",
+            userrole: "",
           })
         )
 
