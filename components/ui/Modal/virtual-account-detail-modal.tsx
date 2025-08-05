@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import Modal from "react-modal"
 import CloseIcon from "public/close-icon"
 import { ButtonModule } from "../Button/Button"
-import { VirtualAccount, useGetVirtualAccountByIdQuery } from "lib/redux/virtualAccountApi"
+import { useGetVirtualAccountByIdQuery, VirtualAccount } from "lib/redux/virtualAccountApi"
 import { notify } from "../Notification/Notification"
 
 interface VirtualAccountDetailModalProps {
