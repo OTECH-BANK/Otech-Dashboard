@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation"
 import { RxDotsVertical } from "react-icons/rx"
 import DeleteModal from "components/ui/Modal/delete-modal"
 import AddEmployeeModal from "components/ui/Modal/add-employee-modal"
-import { useGetAdminsQuery } from "lib/redux/otechplusApi"
+import { useDeleteAdminMutation, useGetAdminsQuery } from "lib/redux/otechplusApi"
 import EditAdminPermissionsModal from "components/Modals/EditAdminPermissionModal"
 import Filtericon from "public/filter-icon"
 import OtechPlusDashboardNav from "components/Navbar/OtechPlusDashboardNav"
+import Modal from "react-modal"
+import CloseIcon from "public/close-icon"
 
 const EmployeeCardSkeleton = () => (
   <div className="relative animate-pulse rounded-lg bg-white p-4 shadow-lg">
@@ -38,6 +40,82 @@ const EmployeeCardSkeleton = () => (
   </div>
 )
 
+interface DeleteAdminModalProps {
+  isOpen: boolean
+  onRequestClose: () => void
+  onConfirm: () => Promise<void>
+  adminName: string
+  loading: boolean
+}
+
+const DeleteAdminModal: React.FC<DeleteAdminModalProps> = ({
+  isOpen,
+  onRequestClose,
+  onConfirm,
+  adminName,
+  loading,
+}) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      className="mt-20 w-[350px] max-w-md overflow-hidden rounded-md bg-white shadow-lg outline-none"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50 overflow-hidden flex items-center justify-center"
+    >
+      <div className="flex w-full items-center justify-between bg-[#F5F8FA] p-4">
+        <h2 className="text-lg font-bold">Delete Admin</h2>
+        <div onClick={onRequestClose} className="cursor-pointer">
+          <CloseIcon />
+        </div>
+      </div>
+      <div className="px-4 pb-6">
+        <p className="my-4">Are you sure you want to delete {adminName}?</p>
+        <div className="flex justify-end gap-4">
+          <ButtonModule
+            type="button"
+            variant="outline"
+            size="lg"
+            className="w-full"
+            onClick={onRequestClose}
+            disabled={loading}
+          >
+            Cancel
+          </ButtonModule>
+          <ButtonModule
+            type="button"
+            variant="danger"
+            size="lg"
+            className="w-full"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <svg
+                  className="mr-2 h-5 w-5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  ></path>
+                </svg>
+                Deleting...
+              </div>
+            ) : (
+              "Delete"
+            )}
+          </ButtonModule>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 export default function EmployeePage() {
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -60,12 +138,11 @@ export default function EmployeePage() {
 
   const [deleteModalState, setDeleteModalState] = useState({
     isOpen: false,
-    employeeId: null as string | null,
-    employeeName: "",
+    adminId: null as number | null,
+    adminName: "",
   })
 
-  const [isDeleting, setIsDeleting] = useState(false)
-
+  const [deleteAdmin, { isLoading: isDeleting }] = useDeleteAdminMutation()
   const {
     data: adminsData,
     isLoading,
@@ -112,27 +189,26 @@ export default function EmployeePage() {
     if (admin) {
       setDeleteModalState({
         isOpen: true,
-        employeeId: id,
-        employeeName: `${admin.firstName} ${admin.lastName}`,
+        adminId: admin.id,
+        adminName: `${admin.firstName} ${admin.lastName}`,
       })
     }
     setOpenDropdownId(null)
   }
 
-  const handleConfirmDelete = async (reason: string) => {
-    setIsDeleting(true)
+  const handleConfirmDelete = async () => {
+    if (!deleteModalState.adminId) return
+
     try {
-      console.log(`Deleting admin ${deleteModalState.employeeId} with reason: ${reason}`)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    } catch (error) {
-      console.error("Error deleting admin:", error)
-    } finally {
-      setIsDeleting(false)
+      await deleteAdmin(deleteModalState.adminId).unwrap()
+      refetch()
       setDeleteModalState({
         isOpen: false,
-        employeeId: null,
-        employeeName: "",
+        adminId: null,
+        adminName: "",
       })
+    } catch (error) {
+      console.error("Error deleting admin:", error)
     }
   }
 
@@ -216,12 +292,12 @@ export default function EmployeePage() {
                                       >
                                         Edit Permissions
                                       </button>
-                                      {/* <button
+                                      <button
                                         onClick={() => handleDelete(admin.id.toString())}
                                         className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
                                       >
                                         Delete
-                                      </button> */}
+                                      </button>
                                     </div>
                                   </div>
                                 )}
@@ -247,7 +323,7 @@ export default function EmployeePage() {
                               </div>
                             </div>
 
-                            <div className="text-grey-600 mt-4 rounded-md bg-[#F5F8FA] p-3">
+                            <div className="text-grey-600 my-4 rounded-md bg-[#F5F8FA] p-3">
                               <div className="flex flex-col gap-2">
                                 <span className="text-sm font-medium">Permissions:</span>
                                 {admin.permissions.length > 0 ? (
@@ -271,6 +347,26 @@ export default function EmployeePage() {
                                   {admin.photo ? "Available" : "Not available"}
                                 </span>
                               </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <ButtonModule
+                                type="submit"
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                                onClick={() => handleEditPermissions(admin.id.toString())}
+                              >
+                                Edit Permissions
+                              </ButtonModule>
+                              <ButtonModule
+                                type="submit"
+                                variant="danger"
+                                size="sm"
+                                className="w-full"
+                                onClick={() => handleDelete(admin.id.toString())}
+                              >
+                                Delete Admin
+                              </ButtonModule>
                             </div>
                           </div>
                         ))}
@@ -298,18 +394,19 @@ export default function EmployeePage() {
         currentPermissions={permissionsModalState.currentPermissions}
       />
 
-      {/* <DeleteModal
+      <DeleteAdminModal
         isOpen={deleteModalState.isOpen}
         onRequestClose={() =>
           setDeleteModalState({
             isOpen: false,
-            employeeId: null,
-            employeeName: "",
+            adminId: null,
+            adminName: "",
           })
         }
         onConfirm={handleConfirmDelete}
-        businessName={deleteModalState.employeeName}
-      /> */}
+        adminName={deleteModalState.adminName}
+        loading={isDeleting}
+      />
 
       <AddEmployeeModal
         isOpen={isAddEmployeeModalOpen}

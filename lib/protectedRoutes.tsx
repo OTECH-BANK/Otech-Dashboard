@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   useEffect(() => {
     // Check authentication status when component mounts
     if (!loading && !isAuthenticated) {
-      router.push("/signin/otech")
+      router.push("/")
     }
 
     // Optional: Verify token validity if needed

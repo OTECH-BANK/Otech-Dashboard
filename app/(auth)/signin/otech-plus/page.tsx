@@ -88,7 +88,7 @@ const SignIn: React.FC = () => {
       <div className="flex w-full flex-col items-center max-sm:mt-10 md:mt-20">
         <div className="mb-4 flex items-center justify-center gap-2">
           <img src="/otech logo.svg" alt="profile" className="h-10 w-10" />
-          <p className="text-xl font-semibold text-[#2a2f4b]">Otech MFB</p>
+          <p className="text-xl font-semibold text-[#2a2f4b]">Otech Plus</p>
         </div>
 
         <div className="flex h-auto rounded-lg max-sm:w-[95%] md:w-[428px] md:border md:bg-[#FFFFFF] md:shadow-sm xl:w-[428px]">

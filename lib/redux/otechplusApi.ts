@@ -594,6 +594,16 @@ export const otectplusApi = createApi({
       }),
       invalidatesTags: ["CustomerDetails", "Admins"],
     }),
+    deleteAdmin: builder.mutation<void, number>({
+      query: (adminId) => ({
+        url: `Admin/${adminId}`,
+        method: "DELETE",
+        headers: {
+          accept: "*/*",
+        },
+      }),
+      invalidatesTags: ["Admins"],
+    }),
   }),
 })
 
@@ -610,4 +620,5 @@ export const {
   useGetMerchantReportQuery,
   useUpdateAdminPermissionsMutation,
   useMakeAdminMutation,
+  useDeleteAdminMutation,
 } = otectplusApi

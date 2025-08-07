@@ -6,9 +6,20 @@ import { CollapsedLogoIcon, LogoIcon } from "./Icons"
 
 import clsx from "clsx"
 import { PlusLinks } from "./PlusLinks"
+import LogoutModal from "components/ui/Modal/otech-plus-logout-modal"
+import LogoutIcon from "public/logout-icon"
 
 const PlusSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+
+  const handleConfirmLogout = () => {
+    // TODO: Implement your logout logic (e.g., clear session or call signOut)
+    console.log("User logged out")
+    setIsLogoutModalOpen(false)
+  }
 
   return (
     <div
@@ -31,14 +42,22 @@ const PlusSidebar = () => {
           <SecondLinks isCollapsed={isCollapsed} />
         </div> */}
       </div>
-      <div className="my-4  flex h-auto items-center justify-between border-t  px-6">
-        <div className="flex items-center space-x-2 border-0 border-black pt-5 text-[#747A80] ">
+      <button
+        onClick={() => setIsLogoutModalOpen(true)}
+        className="my-4 flex h-auto items-center justify-between border-t px-6 pt-4  hover:text-[#f58634]"
+      >
+        <div className="flex items-center space-x-2  text-[#747A80] ">
           <img src="/DashboardImages/Profile.png" />
-          <p className="bottom-bar hidden text-xs font-semibold lg:block 2xl:text-base">Official Site</p>
+          <p className="bottom-bar hidden text-xs font-semibold hover:text-[#f58634] lg:block 2xl:text-base">Log Out</p>
         </div>
-        <img src="/DashboardImages/CaretDoubleVertical.png" className="icon-style pt-5" />
-        <img src="/DashboardImages/CaretDoubleVertical-dark.png" className="dark-icon-style pt-5" />
-      </div>
+        <LogoutIcon />
+      </button>
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onRequestClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+        loading={loading}
+      />
     </div>
   )
 }

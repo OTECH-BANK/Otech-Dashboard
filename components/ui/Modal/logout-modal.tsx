@@ -22,7 +22,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onRequestClose, onCon
 
   const handleLogout = () => {
     dispatch(logout())
-    router.push("/signin/otech")
+    router.push("/")
   }
   return (
     <Modal
