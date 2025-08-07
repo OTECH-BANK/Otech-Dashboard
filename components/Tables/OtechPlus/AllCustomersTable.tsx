@@ -1,6 +1,7 @@
 "use client"
-import React, { useEffect, useRef, useState } from "react"
-import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
+
+import React, { useState } from "react"
+import { RxCaretSort } from "react-icons/rx"
 import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos, MdOutlineCheckBoxOutlineBlank } from "react-icons/md"
 import { useRouter } from "next/navigation"
 import ExportIcon from "public/export-icon"
@@ -10,80 +11,6 @@ import { SearchModule } from "components/ui/Search/search-module"
 import { Customer, useGetCustomersQuery } from "lib/redux/otechplusApi"
 
 type SortOrder = "asc" | "desc" | null
-
-interface ActionDropdownProps {
-  customer: Customer
-  onViewDetails: (customer: Customer) => void
-}
-
-const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  const handleViewDetails = (e: React.MouseEvent) => {
-    e.preventDefault()
-    localStorage.setItem("selectedCustomer", JSON.stringify(customer))
-    onViewDetails(customer)
-    setIsOpen(false)
-    router.push(`/otech-plus/customers/${customer.id}`)
-  }
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div
-        className="focus::bg-gray-100 flex h-7 w-7 cursor-pointer items-center justify-center gap-2 rounded-full transition-all duration-200 ease-in-out hover:bg-gray-200"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <RxDotsVertical />
-      </div>
-      {isOpen && (
-        <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <a
-              href={`/otech-plus/customers/${customer.id}`}
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={handleViewDetails}
-            >
-              View Details
-            </a>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                console.log("Freeze customer:", customer.id)
-                setIsOpen(false)
-              }}
-            >
-              Freeze Account
-            </button>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                console.log("Delete customer:", customer.id)
-                setIsOpen(false)
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 const LoadingSkeleton = () => {
   return (
@@ -142,6 +69,7 @@ const AllCustomersTable: React.FC = () => {
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
+  const router = useRouter()
 
   // Fetch customers using RTK Query from otectplusApi
   const {
@@ -174,6 +102,59 @@ const AllCustomersTable: React.FC = () => {
 
   const handleCancelSearch = () => {
     setSearchText("")
+  }
+
+  const handleViewDetails = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setIsCustomerDetailModalOpen(true)
+    localStorage.setItem("selectedCustomer", JSON.stringify(customer))
+    router.push(`/otech-plus/customers/${customer.id}`)
+  }
+
+  const exportToCSV = () => {
+    if (!customers.length) return
+
+    // Prepare headers
+    const headers = [
+      "Customer ID",
+      "First Name",
+      "Last Name",
+      "Email",
+      "Phone",
+      "Level",
+      "Status",
+      "Points",
+      "Address",
+      "Created At",
+    ]
+
+    // Prepare data rows
+    const dataRows = customers.map((customer) => [
+      customer.id,
+      customer.firstName || "N/A",
+      customer.lastName || "N/A",
+      customer.email || "N/A",
+      customer.phoneNumber || "N/A",
+      customer.level?.label || "N/A",
+      customer.status?.label || "N/A",
+      customer.point || 0,
+    ])
+
+    // Combine headers and data
+    const csvContent = [
+      headers.join(","),
+      ...dataRows.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(",")),
+    ].join("\n")
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", `customers_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const filteredCustomers = customers.filter((customer) =>
@@ -213,14 +194,8 @@ const AllCustomersTable: React.FC = () => {
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
-            variant="black"
-            size="md"
-            icon={<ExportIcon />}
-            iconPosition="end"
-            onClick={() => alert("Export clicked!")}
-          >
-            <p className="max-sm:hidden">Export</p>
+          <ButtonModule variant="black" size="md" icon={<ExportIcon />} iconPosition="end" onClick={exportToCSV}>
+            <p className="max-sm:hidden">Export CSV</p>
           </ButtonModule>
         </div>
       </div>
@@ -327,13 +302,9 @@ const AllCustomersTable: React.FC = () => {
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-2 text-sm">{customer.point || 0}</td>
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
-                      <ActionDropdown
-                        customer={customer}
-                        onViewDetails={(cust) => {
-                          setSelectedCustomer(cust)
-                          setIsCustomerDetailModalOpen(true)
-                        }}
-                      />
+                      <ButtonModule variant="outline" size="sm" onClick={() => handleViewDetails(customer)}>
+                        View Details
+                      </ButtonModule>
                     </td>
                   </tr>
                 ))}

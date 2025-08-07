@@ -378,9 +378,6 @@ const AllBusinessTable = () => {
                       Status <RxCaretSort />
                     </div>
                   </th>
-                  <th className="whitespace-nowrap border-b p-4 text-sm">
-                    <div className="flex items-center gap-2">Action</div>
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -429,14 +426,6 @@ const AllBusinessTable = () => {
                           {business.status || "Active"}
                         </div>
                       </div>
-                    </td>
-                    <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
-                      <ActionDropdown
-                        business={business}
-                        onViewDetails={(business) => {
-                          setSelectedBusiness(business)
-                        }}
-                      />
                     </td>
                   </tr>
                 ))}

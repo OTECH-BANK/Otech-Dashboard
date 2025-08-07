@@ -1,90 +1,16 @@
 "use client"
-import React, { useEffect, useRef, useState } from "react"
-import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
+
+import React, { useState } from "react"
+import { RxCaretSort } from "react-icons/rx"
 import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos, MdOutlineCheckBoxOutlineBlank } from "react-icons/md"
 import { useRouter } from "next/navigation"
 import ExportIcon from "public/export-icon"
 import EmptyState from "public/empty-state"
 import { ButtonModule } from "components/ui/Button/Button"
 import { SearchModule } from "components/ui/Search/search-module"
-
 import { Customer, useGetCustomersQuery } from "lib/redux/customerApi"
 
 type SortOrder = "asc" | "desc" | null
-
-interface ActionDropdownProps {
-  customer: Customer
-  onViewDetails: (customer: Customer) => void
-}
-
-const ActionDropdown: React.FC<ActionDropdownProps> = ({ customer, onViewDetails }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  const handleViewDetails = (e: React.MouseEvent) => {
-    e.preventDefault()
-    localStorage.setItem("selectedCustomer", JSON.stringify(customer))
-    onViewDetails(customer)
-    setIsOpen(false)
-    router.push(`/customers/customer-detail/${customer.customerID}`)
-  }
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div
-        className="focus::bg-gray-100 flex h-7 w-7 cursor-pointer items-center justify-center gap-2 rounded-full transition-all duration-200 ease-in-out hover:bg-gray-200"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <RxDotsVertical />
-      </div>
-      {isOpen && (
-        <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <a
-              href={`/customers/customer-detail/${customer.customerID}`}
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={handleViewDetails}
-            >
-              View Details
-            </a>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                console.log("Freeze customer:", customer.customerID)
-                setIsOpen(false)
-              }}
-            >
-              Freeze Account
-            </button>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                console.log("Delete customer:", customer.customerID)
-                setIsOpen(false)
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 const LoadingSkeleton = () => {
   return (
@@ -142,7 +68,8 @@ const CustomersTable: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
   const [searchText, setSearchText] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10) // Make pageSize stateful
+  const [pageSize, setPageSize] = useState(10)
+  const router = useRouter()
 
   const {
     data: customersResponse,
@@ -184,16 +111,20 @@ const CustomersTable: React.FC = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
-  // Handle page size change
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = Number(e.target.value)
     setPageSize(newSize)
-    setCurrentPage(1) // Reset to first page when changing page size
+    setCurrentPage(1)
   }
 
-  // Export to CSV function
+  const handleViewDetails = (customer: Customer) => {
+    localStorage.setItem("selectedCustomer", JSON.stringify(customer))
+    setSelectedCustomer(customer)
+    setIsCustomerDetailModalOpen(true)
+    router.push(`/customers/customer-detail/${customer.customerID}`)
+  }
+
   const exportToCSV = () => {
-    // Prepare headers
     const headers = [
       "Customer ID",
       "Customer Name",
@@ -205,7 +136,6 @@ const CustomersTable: React.FC = () => {
       "Date Created",
     ]
 
-    // Prepare data rows
     const dataRows = filteredCustomers.map((customer) => [
       customer.customerID,
       customer.fullName || `${customer.firstName} ${customer.lastName}`,
@@ -217,13 +147,11 @@ const CustomersTable: React.FC = () => {
       new Date(customer.createdate).toLocaleDateString(),
     ])
 
-    // Combine headers and data
     const csvContent = [
       headers.join(","),
       ...dataRows.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(",")),
     ].join("\n")
 
-    // Create download link
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
@@ -389,13 +317,9 @@ const CustomersTable: React.FC = () => {
                       {new Date(customer.createdate).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
-                      <ActionDropdown
-                        customer={customer}
-                        onViewDetails={(cust) => {
-                          setSelectedCustomer(cust)
-                          setIsCustomerDetailModalOpen(true)
-                        }}
-                      />
+                      <ButtonModule variant="outline" size="sm" onClick={() => handleViewDetails(customer)}>
+                        View Details
+                      </ButtonModule>
                     </td>
                   </tr>
                 ))}

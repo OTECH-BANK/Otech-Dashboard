@@ -99,7 +99,7 @@ export default function AllTransactions() {
           <div className="flex flex-col">
             <div className="flex items-center justify-between border-b px-16 py-4">
               <p className="text-2xl font-medium">Businesses Page</p>
-              <ButtonModule
+              {/* <ButtonModule
                 variant="primary"
                 size="md"
                 icon={<AddBusiness />}
@@ -107,7 +107,7 @@ export default function AllTransactions() {
                 onClick={() => setIsAddBusinessModalOpen(true)}
               >
                 Add Business
-              </ButtonModule>
+              </ButtonModule> */}
             </div>
 
             <div className="max-sm-my-4 flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:px-3 md:my-8">

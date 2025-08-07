@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { useState } from "react"
 import {
   MdOutlineArrowBackIosNew,
   MdOutlineArrowForwardIos,
   MdOutlineCheckBoxOutlineBlank,
   MdRefresh,
 } from "react-icons/md"
-import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
+import { RxCaretSort } from "react-icons/rx"
 import OutgoingIcon from "public/outgoing-icon"
 import IncomingIcon from "public/incoming-icon"
 import { ButtonModule } from "components/ui/Button/Button"
@@ -30,73 +30,6 @@ export type Order = {
   payment70: string
   orderStatus: string
   date: string
-}
-
-interface ActionDropdownProps {
-  order: Order
-  onViewDetails: (order: Order) => void
-  onDelete: (order: Order) => void
-}
-
-const ActionDropdown: React.FC<ActionDropdownProps> = ({ order, onViewDetails, onDelete }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div
-        className="focus::bg-gray-100 flex h-7 w-7 cursor-pointer items-center justify-center gap-2 rounded-full transition-all duration-200 ease-in-out hover:bg-gray-200"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <RxDotsVertical />
-      </div>
-      {isOpen && (
-        <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                onViewDetails(order)
-                setIsOpen(false)
-              }}
-            >
-              View Details
-            </button>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                console.log("Edit order:", order.orderId)
-                setIsOpen(false)
-              }}
-            >
-              Edit
-            </button>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                onDelete(order)
-                setIsOpen(false)
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
 }
 
 const SkeletonRow = () => {
@@ -681,14 +614,16 @@ const AllTransactionTable: React.FC = () => {
                       </div>
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
-                      <ActionDropdown
-                        order={order}
-                        onViewDetails={(order) => {
+                      <ButtonModule
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
                           setSelectedTransactionID(order.transactionID)
                           setIsOrderDetailModalOpen(true)
                         }}
-                        onDelete={handleDeleteClick}
-                      />
+                      >
+                        View Detail
+                      </ButtonModule>
                     </td>
                   </tr>
                 ))}

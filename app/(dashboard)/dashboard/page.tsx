@@ -226,13 +226,13 @@ export default function Dashboard() {
                               <AccountIcon />
                               Accounts
                             </div>
-                            <div className="mt-4 flex min-h-[42px] w-full cursor-pointer items-center gap-2 rounded-lg bg-[#ffe8d1] px-3 py-4">
+                            {/* <div className="mt-4 flex min-h-[42px] w-full cursor-pointer items-center gap-2 rounded-lg bg-[#ffe8d1] px-3 py-4">
                               <WarningIcon />
                               <p className="font-bold text-[#202B3C]">
                                 <span className="font-normal">Unresolved transactions: </span>
                                 {formatCount(metrics?.flaggedTransactions)}
                               </p>
-                            </div>
+                            </div> */}
                             <div className="flex items-end justify-between pt-4">
                               <div>
                                 <p className="text-secondary font-semibold">

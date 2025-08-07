@@ -126,9 +126,9 @@ const CustomerDetailPage: React.FC = () => {
             </div>
 
             <div className="flex gap-4 max-sm:pt-4">
-              <ButtonModule variant="outline" size="md" iconPosition="end">
+              {/* <ButtonModule variant="outline" size="md" iconPosition="end">
                 Generate Statement
-              </ButtonModule>
+              </ButtonModule> */}
 
               {customer.customerStatus ? (
                 <ButtonModule

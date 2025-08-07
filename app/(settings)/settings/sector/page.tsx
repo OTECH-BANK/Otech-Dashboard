@@ -158,7 +158,7 @@ export default function ChannelList() {
         <div className="flex flex-col">
           <div className="flex items-center justify-between border-b px-16 py-4 max-sm:px-3">
             <p className="text-2xl font-medium">Channels</p>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               <ButtonModule
                 variant="primary"
                 size="md"
@@ -168,7 +168,7 @@ export default function ChannelList() {
               >
                 Add Channel
               </ButtonModule>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3 md:my-8">

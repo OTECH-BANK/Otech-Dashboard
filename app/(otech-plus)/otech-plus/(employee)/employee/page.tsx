@@ -173,15 +173,6 @@ export default function EmployeePage() {
                         <p>{adminsData?.totalCount || 0}</p>
                       )}
                     </div>
-                    <ButtonModule
-                      variant="secondary"
-                      size="md"
-                      icon={<Filtericon />}
-                      iconPosition="end"
-                      onClick={toggleFilter}
-                    >
-                      Filter
-                    </ButtonModule>
                   </div>
                   <div className={`grid w-full gap-4 max-sm:grid-cols-1 lg:grid-cols-3`}>
                     {isLoading
@@ -225,12 +216,12 @@ export default function EmployeePage() {
                                       >
                                         Edit Permissions
                                       </button>
-                                      <button
+                                      {/* <button
                                         onClick={() => handleDelete(admin.id.toString())}
                                         className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
                                       >
                                         Delete
-                                      </button>
+                                      </button> */}
                                     </div>
                                   </div>
                                 )}
@@ -257,9 +248,22 @@ export default function EmployeePage() {
                             </div>
 
                             <div className="text-grey-600 mt-4 rounded-md bg-[#F5F8FA] p-3">
-                              <div className="flex justify-between text-sm">
-                                <span>ID:</span>
-                                <span className="text-base font-bold text-[#202B3C]">{admin.id}</span>
+                              <div className="flex flex-col gap-2">
+                                <span className="text-sm font-medium">Permissions:</span>
+                                {admin.permissions.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1">
+                                    {admin.permissions.map((permission) => (
+                                      <span
+                                        key={permission.id}
+                                        className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800"
+                                      >
+                                        {permission.type.label}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-gray-500">No permissions assigned</span>
+                                )}
                               </div>
                               <div className="mt-2 flex justify-between text-sm">
                                 <span>Photo:</span>
@@ -268,16 +272,6 @@ export default function EmployeePage() {
                                 </span>
                               </div>
                             </div>
-
-                            <ButtonModule
-                              className="mt-4"
-                              variant="black"
-                              size="md"
-                              iconPosition="end"
-                              onClick={() => handleViewDetails(admin.id.toString())}
-                            >
-                              View Details
-                            </ButtonModule>
                           </div>
                         ))}
                   </div>

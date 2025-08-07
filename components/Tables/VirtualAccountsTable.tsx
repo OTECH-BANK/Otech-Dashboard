@@ -322,9 +322,9 @@ const VirtualAccountsTable: React.FC = () => {
                       Business <RxCaretSort />
                     </div>
                   </th>
-                  <th className="whitespace-nowrap border-b p-4 text-sm">
+                  {/* <th className="whitespace-nowrap border-b p-4 text-sm">
                     <div className="flex items-center gap-2">Action</div>
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody>
@@ -367,14 +367,14 @@ const VirtualAccountsTable: React.FC = () => {
                         {account.business}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
+                    {/* <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
                       <ActionDropdown
                         account={account}
                         onViewDetails={(account) => {
                           setSelectedAccountId(account.virtualAccountID)
                         }}
                       />
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

@@ -195,40 +195,92 @@ export default function Dashboard() {
                             <AccountIcon />
                             Accounts Summary
                           </div>
-                          <div className="mt-4 flex min-h-[42px] w-full cursor-pointer items-center gap-2 rounded-lg bg-[#ffe8d1] px-3 py-4">
-                            <WarningIcon />
-                            <p className="font-bold text-[#202B3C]">
-                              <span className="font-normal">Unresolved transactions, click to resolve </span>
-                            </p>
-                          </div>
+
                           <div className="flex items-end justify-between pt-4">
-                            <div>
-                              <p className="text-secondary font-semibold">
-                                {isCustomerReportLoading ? (
-                                  <span className="h-4 w-24 animate-pulse rounded bg-gray-200"></span>
-                                ) : (
-                                  <>
-                                    Total Customers{" "}
-                                    <span className="text-grey-300 font-normal">
-                                      ({customerReportData?.data.countActive || 0})
-                                    </span>
-                                  </>
+                            <div className="grid w-full grid-cols-2 gap-4">
+                              {/* Customers */}
+                              <div className="rounded-lg bg-white p-4 shadow">
+                                <p className="text-secondary font-semibold">
+                                  {isCustomerReportLoading ? (
+                                    <span className="h-4 w-24 animate-pulse rounded bg-gray-200"></span>
+                                  ) : (
+                                    <>
+                                      Total Customers{" "}
+                                      <span className="text-grey-300 font-normal">
+                                        ({customerReportData?.data.countActive || 0})
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                                {customerReportData && (
+                                  <div className="mt-2 text-sm text-gray-500">
+                                    Verified: {customerReportData.data.countVerified}
+                                  </div>
                                 )}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-secondary font-semibold">
-                                {isMerchantReportLoading ? (
-                                  <span className="h-4 w-24 animate-pulse rounded bg-gray-200"></span>
-                                ) : (
-                                  <>
-                                    Total Merchants{" "}
-                                    <span className="text-grey-300 font-normal">
-                                      ({merchantReportData?.data.countActive || 0})
-                                    </span>
-                                  </>
+                              </div>
+
+                              {/* Merchants */}
+                              <div className="rounded-lg bg-white p-4 shadow">
+                                <p className="text-secondary font-semibold">
+                                  {isMerchantReportLoading ? (
+                                    <span className="h-4 w-24 animate-pulse rounded bg-gray-200"></span>
+                                  ) : (
+                                    <>
+                                      Total Merchants{" "}
+                                      <span className="text-grey-300 font-normal">
+                                        ({merchantReportData?.data.countActive || 0})
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                                {merchantReportData && (
+                                  <div className="mt-2 text-sm text-gray-500">
+                                    Verified: {merchantReportData.data.countVerified}
+                                  </div>
                                 )}
-                              </p>
+                              </div>
+
+                              {/* Transactions */}
+                              {/* <div className="rounded-lg bg-white p-4 shadow">
+                                <p className="text-secondary font-semibold">
+                                  {isReportLoading ? (
+                                    <span className="h-4 w-24 animate-pulse rounded bg-gray-200"></span>
+                                  ) : (
+                                    <>
+                                      Daily Transactions{" "}
+                                      <span className="text-grey-300 font-normal">
+                                        ({reportData?.data.paymentReport.countDaily || 0})
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                                {reportData && (
+                                  <div className="mt-2 text-sm text-gray-500">
+                                    Volume: ₦{(reportData.data.paymentReport.totalDaily || 0).toLocaleString()}
+                                  </div>
+                                )}
+                              </div> */}
+
+                              {/* Transaction Volume */}
+                              {/* <div className="rounded-lg bg-white p-4 shadow">
+                                <p className="text-secondary font-semibold">
+                                  {isReportLoading ? (
+                                    <span className="h-4 w-24 animate-pulse rounded bg-gray-200"></span>
+                                  ) : (
+                                    <>
+                                      Monthly Volume{" "}
+                                      <span className="text-grey-300 font-normal">
+                                        (₦{(reportData?.data.paymentReport.totalMonthly || 0).toLocaleString()})
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                                {reportData && (
+                                  <div className="mt-2 text-sm text-gray-500">
+                                    Transactions: {reportData.data.paymentReport.countMonthly}
+                                  </div>
+                                )}
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -283,11 +335,7 @@ export default function Dashboard() {
                                 )}
                               </p>
                             </div>
-                            <div>
-                              <ButtonModule type="submit" variant="outline" size="sm" className="w-full">
-                                View
-                              </ButtonModule>
-                            </div>
+                            <div></div>
                           </div>
                         </div>
                       </div>

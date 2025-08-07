@@ -1,5 +1,7 @@
+"use client"
+
 import React, { useState } from "react"
-import { RxCaretSort, RxDotsVertical } from "react-icons/rx"
+import { RxCaretSort } from "react-icons/rx"
 import { MdOutlineArrowBackIosNew, MdOutlineArrowForwardIos, MdOutlineCheckBoxOutlineBlank } from "react-icons/md"
 import OutgoingIcon from "public/outgoing-icon"
 import IncomingIcon from "public/incoming-icon"
@@ -7,9 +9,7 @@ import { ButtonModule } from "components/ui/Button/Button"
 import ExportIcon from "public/export-icon"
 import { SearchModule } from "components/ui/Search/search-module"
 import EmptyState from "public/empty-state"
-
 import DeleteModal from "components/ui/Modal/delete-modal"
-
 import { useRouter } from "next/navigation"
 import { useGetTransactionsQuery } from "lib/redux/otechplusApi"
 import TransactionDetailModal from "components/ui/Modal/OtechPlus/transaction-detail-modal"
@@ -26,73 +26,6 @@ export type Order = {
   payment70: string
   orderStatus: string
   date: string
-}
-
-interface ActionDropdownProps {
-  order: Order
-  onViewDetails: (order: Order) => void
-  onDelete: (order: Order) => void
-}
-
-const ActionDropdown: React.FC<ActionDropdownProps> = ({ order, onViewDetails, onDelete }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div
-        className="focus::bg-gray-100 flex h-7 w-7 cursor-pointer items-center justify-center gap-2 rounded-full transition-all duration-200 ease-in-out hover:bg-gray-200"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <RxDotsVertical />
-      </div>
-      {isOpen && (
-        <div className="absolute right-0 z-[1000] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                onViewDetails(order)
-                setIsOpen(false)
-              }}
-            >
-              View Details
-            </button>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                console.log("Edit order:", order.orderId)
-                setIsOpen(false)
-              }}
-            >
-              Edit
-            </button>
-            <button
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              onClick={() => {
-                onDelete(order)
-                setIsOpen(false)
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
 }
 
 const RecentTransactionTable = () => {
@@ -240,8 +173,48 @@ const RecentTransactionTable = () => {
     }
   }
 
+  const handleViewDetails = (order: Order) => {
+    setSelectedTransactionID(order.transactionID)
+    setIsOrderDetailModalOpen(true)
+  }
+
   const handleViewAllTransactions = () => {
     router.push(`/transactions`)
+  }
+
+  const exportToCSV = () => {
+    if (!orders.length) return
+
+    // Prepare headers
+    const headers = ["Reference ID", "Sender", "Recipient", "Receiving Bank", "Type", "Amount", "Status", "Date"]
+
+    // Prepare data rows
+    const dataRows = orders.map((order) => [
+      order.orderId,
+      order.customer,
+      order.beneficiary,
+      order.bank,
+      order.type,
+      `NGN ${order.payment70}`,
+      order.orderStatus,
+      order.date,
+    ])
+
+    // Combine headers and data
+    const csvContent = [
+      headers.join(","),
+      ...dataRows.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(",")),
+    ].join("\n")
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", `transactions_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const filteredOrders = orders.filter((order) =>
@@ -330,17 +303,8 @@ const RecentTransactionTable = () => {
             onChange={(e) => setSearchText(e.target.value)}
             onCancel={handleCancelSearch}
           />
-          <ButtonModule
-            variant="black"
-            size="md"
-            icon={<ExportIcon />}
-            iconPosition="end"
-            onClick={() => alert("Button clicked!")}
-          >
-            <p className="max-sm:hidden">Export</p>
-          </ButtonModule>
-          <ButtonModule variant="secondary" size="md" onClick={() => handleViewAllTransactions()}>
-            <p className="max-sm:hidden">View All</p>
+          <ButtonModule variant="black" size="md" icon={<ExportIcon />} iconPosition="end" onClick={exportToCSV}>
+            <p className="max-sm:hidden">Export CSV</p>
           </ButtonModule>
         </div>
       </div>
@@ -487,14 +451,11 @@ const RecentTransactionTable = () => {
                       </div>
                     </td>
                     <td className="whitespace-nowrap border-b px-4 py-1 text-sm">
-                      <ActionDropdown
-                        order={order}
-                        onViewDetails={(order) => {
-                          setSelectedTransactionID(order.transactionID)
-                          setIsOrderDetailModalOpen(true)
-                        }}
-                        onDelete={handleDeleteClick}
-                      />
+                      <div className="flex gap-2">
+                        <ButtonModule variant="outline" size="sm" onClick={() => handleViewDetails(order)}>
+                          View
+                        </ButtonModule>
+                      </div>
                     </td>
                   </tr>
                 ))}

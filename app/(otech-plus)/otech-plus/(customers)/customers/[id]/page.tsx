@@ -3,7 +3,6 @@ import React from "react"
 import { useParams, useRouter } from "next/navigation"
 
 import ActivateCustomerModal from "components/ui/Modal/activate-customer-modal"
-
 import DashboardNav from "components/Navbar/DashboardNav"
 import DeactivateCustomerModal from "components/ui/Modal/freeze-account-modal"
 import DeleteCustomerModal from "components/ui/Modal/delete-customer-modal"
@@ -37,7 +36,78 @@ const CustomerDetailPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Loading customer details...</div>
+    return (
+      <section className="h-full w-full">
+        <div className="flex min-h-screen w-full">
+          <div className="flex w-full flex-col">
+            <OtechPlusDashboardNav />
+
+            {/* Header Bar Skeleton */}
+            <div className="animate-pulse border-b px-16 py-4 max-sm:px-3">
+              <div className="flex justify-between">
+                <div className="h-8 w-48 rounded bg-gray-200"></div>
+                <div className="flex gap-4">
+                  <div className="h-10 w-32 rounded bg-gray-200"></div>
+                  <div className="h-10 w-32 rounded bg-gray-200"></div>
+                  <div className="h-10 w-32 rounded bg-gray-200"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Skeleton */}
+            <div className="mt-8 flex w-full gap-6 px-16 max-md:flex-col max-md:px-0 max-sm:my-4 max-sm:px-3">
+              <div className="w-full space-y-6">
+                {/* Profile Section Skeleton */}
+                <div className="rounded-lg bg-white p-6 shadow">
+                  <div className="flex items-center gap-4">
+                    <div className="h-20 w-20 rounded-full bg-gray-200"></div>
+                    <div className="space-y-2">
+                      <div className="h-6 w-48 rounded bg-gray-200"></div>
+                      <div className="h-4 w-32 rounded bg-gray-200"></div>
+                    </div>
+                  </div>
+                  <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="h-4 w-24 rounded bg-gray-200"></div>
+                        <div className="h-6 w-full rounded bg-gray-200"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Wallet Section Skeleton */}
+                <div className="rounded-lg bg-white p-6 shadow">
+                  <div className="h-6 w-48 rounded bg-gray-200"></div>
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="space-y-2 rounded-lg border p-4">
+                        <div className="h-4 w-32 rounded bg-gray-200"></div>
+                        <div className="h-6 w-full rounded bg-gray-200"></div>
+                        <div className="h-4 w-24 rounded bg-gray-200"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* KYC Section Skeleton */}
+                <div className="rounded-lg bg-white p-6 shadow">
+                  <div className="h-6 w-48 rounded bg-gray-200"></div>
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="h-4 w-32 rounded bg-gray-200"></div>
+                        <div className="h-6 w-full rounded bg-gray-200"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   if (isError || !response?.data) {
